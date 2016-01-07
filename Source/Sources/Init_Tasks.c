@@ -5,17 +5,17 @@
 /*============================================================================*/
 /*!
  * $Source: Init_Tasks.c $
- * $Revision: 1.6 $
+ * $Revision: 1.1 $
  * $Author:		Edgar Escayola Vinagre	$
  *		 		Adrian Zacarias Siete	$
  *			
- * $Date: 06-12-2015 $
+ * $Date: 07-01-2015 $
  */
 /*============================================================================*/
 /* DESCRIPTION :                                                              */
 /** \Init_Tasks.c
 
-		This file contains the global initializations.
+		This file contains the global initializations for the Scheduler
 		
 		It contains the array that has the description of the tasks: 
 		function pointers, periods and offsets. Also the software initializations.
@@ -37,7 +37,7 @@
 /*============================================================================*/
 /*  DATABASE           |        PROJECT     | FILE VERSION (AND INSTANCE)     */
 /*----------------------------------------------------------------------------*/
-/*                     |        LIN_EA      |           1.6                   */
+/*                     |      Cluster_EA    |           1.1                   */
 /*============================================================================*/
 /*                               OBJECT HISTORY                               */
 /*============================================================================*/
@@ -55,11 +55,12 @@ volatile T_UWORD raub_DynConuter[E_TSK_N_OF];
 
 const S_STAT cas_STAT[E_TSK_N_OF] = {/*	Function Pointer	-	Period 	-	  Offset	*/
 		
-		{		&Task_10ms,					2	,		0		},
-		{		&Task_20ms,					4	,		1		},
-		{		&Task_50ms,					10	,		2		},
-		{		&Task_100ms,				20	,		3		},
-		
+		{		&Task0_5ms,					5	,		0		},
+		{		&Task1_10ms,				10	,		1		},
+		{		&Task2_50ms,				50	,		2		},
+		{		&Task3_100ms,				100	,		3		},
+		{		&Task4_200ms,				200	,		5		},
+		{		&Task5_250ms,				250	,		7		},
 		/*	Add here your new task and a comma before the last one	*/			
 		/*	{	Function Pointer	,	Period	,		Offset	}	*/	
 };

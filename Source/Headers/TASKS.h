@@ -9,7 +9,7 @@
  * $Author: 	Edgar Escayola Vinagre	$
  * 				Adrian Zacarias Siete 	$
  *				
- * $Date: 01-12-2015 $
+ * $Date: 07-01-2016 $
  */
 /*============================================================================*/
 /* DESCRIPTION :                                                              */
@@ -33,7 +33,7 @@
 /*============================================================================*/
 /*  DATABASE           |        PROJECT     | FILE VERSION (AND INSTANCE)     */
 /*----------------------------------------------------------------------------*/
-/*                     |          LIN_EA    |           1.1                   */
+/*                     |      Cluster_EA    |           1.1                   */
 /*============================================================================*/
 /*                               OBJECT HISTORY                               */
 /*============================================================================*/
@@ -45,14 +45,15 @@
 /* Includes */
 /*============================================================================*/
 #include "typedefs.h"
-#include "dummy.h"
 #include "Can_Manager.h"
 /* Exported functions prototypes */
 /*============================================================================*/
-extern void Task_10ms(void);
-extern void Task_20ms(void);
-extern void Task_50ms(void);
-extern void Task_100ms(void);
+extern void Task0_5ms(void);
+extern void Task1_10ms(void);
+extern void Task2_50ms(void);
+extern void Task3_100ms(void);
+extern void Task4_200ms(void);
+extern void Task5_250ms(void);
 /*Add here the prototype of your new task*/
 
 #endif /* TASKS_H_ */
