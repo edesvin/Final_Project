@@ -5,12 +5,12 @@
 /*============================================================================*/
 /*!
  * $Source: LCD.c $
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * &Project: Cluster_EA $
  * $Author: 	Edgar Escayola Vinagre	$
  * 				Adrian Zacarias Siete 	$
  *				
- * $Date: 07-01-2016 $
+ * $Date: 11-01-2016 $
  */
 /*============================================================================*/
 /* DESCRIPTION :                                                              */
@@ -34,7 +34,7 @@
 /*============================================================================*/
 /*  DATABASE           |        PROJECT     | FILE VERSION (AND INSTANCE)     */
 /*----------------------------------------------------------------------------*/
-/*                     |      Cluster_EA    |           1.1                   */
+/*                     |      Cluster_EA    |           1.2                   */
 /*============================================================================*/
 /*                               OBJECT HISTORY                               */
 /*============================================================================*/
@@ -48,41 +48,10 @@
 
 /* Constants and types  */
 /*============================================================================*/
-#define LCD_DATA_0 			SIU.GPDO[80].B.PDO
-#define LCD_DATA_1 			SIU.GPDO[81].B.PDO 
-#define LCD_DATA_2 			SIU.GPDO[82].B.PDO 
-#define LCD_DATA_3 			SIU.GPDO[83].B.PDO
-
-#define LCD_DATA_STATE_0 	SIU.GPDI[80].B.PDI
-#define LCD_DATA_STATE_1 	SIU.GPDI[81].B.PDI
-#define LCD_DATA_STATE_2 	SIU.GPDI[82].B.PDI 
-#define LCD_DATA_STATE_3 	SIU.GPDI[83].B.PDI 
-
-#define LCD_DATA_TRIS_0 	SIU.PCR[80].R
-#define LCD_DATA_TRIS_1 	SIU.PCR[81].R
-#define LCD_DATA_TRIS_2 	SIU.PCR[82].R
-#define LCD_DATA_TRIS_3 	SIU.PCR[83].R
-
-#define LCD_RS         		SIU.GPDO[84].B.PDO
-#define LCD_RS_TRIS    		SIU.PCR[84].R
-
-#define LCD_RW          	SIU.GPDO[85].B.PDO
-#define LCD_RW_TRIS     	SIU.PCR[85].R
-
-#define LCD_E           	SIU.GPDO[86].B.PDO
-#define LCD_E_TRIS      	SIU.PCR[86].R
-
-#define SET_E() 			(LCD_E = 1)
-#define SET_RS() 			(LCD_RS = 1)
-#define SET_RW() 			(LCD_RW = 1)
-
-#define CLEAR_E() 			(LCD_E = 0)
-#define CLEAR_RS() 			(LCD_RS = 0)
-#define CLEAR_RW() 			(LCD_RW = 0)
-
-#define OUTPUT				 0x0200
-#define INPUT 				 0x0100
-#define CLEAR 				 0x0000;
+#define DATA_0 						0x00
+#define DATA_1 						0x01
+#define DATA_2 						0x02
+#define DATA_3 						0x03
 
 #define SET_CUSTOM_CHARS			0x40
 #define DISPLAY_ON					0x0C
@@ -99,13 +68,20 @@
 #define THIRD_LINE					0x14
 #define FOURTH_LINE					0x54
 #define MAX_X_VALUE					20
+#define DATA_OFFSET					48
+#define TENTH						10
+#define MAX_FIELD_LENGTH			5
+#define STM_1us						64
+#define STM_500ns					32
+#define STM_30ms					0x1D4C00
+#define MIN_VALID_INDEX				0
+#define MAX_VALID_INDEX				7
 
 /* Private functions prototypes */
 /*============================================================================*/
 void delay_1u(void);
 void delay_500n(void);
 void delay_30ms(void);
-
 
 /* Private functions */
 /*==============================================================================
@@ -115,8 +91,8 @@ void delay_30ms(void);
 *
 ==============================================================================*/
 void delay_1u(void){
-	STM.CNT.R = 0;					/* Reset STM counter */	
-	while( STM.CNT.R <= 64 ){
+	Clear_STM();					/* Reset STM counter */	
+	while( STM_Value <= STM_1us ){
 		/* Wait for 1 us */
 	}
 }
@@ -128,27 +104,27 @@ void delay_1u(void){
 *
 ==============================================================================*/
 void delay_500n(void){
-	STM.CNT.R = 0;					/* Reset STM counter */	
-	while( STM.CNT.R <= 32 ){
+	Clear_STM();					/* Reset STM counter */	
+	while( STM_Value <= STM_500ns ){
 		/* Wait for 500 ns */
 	}
 }
 
 /*==============================================================================
-* Function: 
+* Function: delay_30ms
 * 
 * Description: 
 *
 ==============================================================================*/
 void delay_30ms(void){
-	STM.CNT.R = 0;					/* Reset STM counter */	
-	while( STM.CNT.R <= 0x1D4C00 ){
+	Clear_STM();					/* Reset STM counter */	
+	while( STM_Value <= STM_30ms ){
 		/* Wait for 30 ms */
 	}
 }
 
 /*==============================================================================
-* Function: 
+* Function: LCDByte
 * 
 * Description: 
 *
@@ -160,44 +136,46 @@ void LCDByte(T_UBYTE lub_byte, T_UBYTE lub_isdata)
     //cmd=1 for command
 
     T_UBYTE lub_high_byte, lub_low_byte;		
-    T_UBYTE lub_temp;
+    T_UBYTE lub_temp, lub_lcd_data;
 
     lub_high_byte = lub_byte >> 4; 		/* Divide the byte that will be sent in 4 byte mode */	
     lub_low_byte = lub_byte & 0x0F;
 
     if(lub_isdata == 0){				/* Check whether it is a command */	
-		CLEAR_RS();
+		Set_LCD_RS(RESET);
     }else{
-		SET_RS();
+		Set_LCD_RS(SET);
 	}
 	
     delay_500n();		
 
-    SET_E();
+    Set_LCD_E(SET);
 
-    lub_temp = ( ( LCD_DATA_STATE_0 +  (LCD_DATA_STATE_1<<1) + (LCD_DATA_STATE_2<<2) +  (LCD_DATA_STATE_3<<3)) & (~(0X0F)))|(lub_high_byte);
-    LCD_DATA_0 = lub_temp & FIRST_BIT;
-	LCD_DATA_1 = ((lub_temp & SECOND_BIT) >> 1) & FIRST_BIT;
-    LCD_DATA_2 = ((lub_temp & THIRD_BIT)  >> 2) & FIRST_BIT;
-	LCD_DATA_3 = ((lub_temp & FOURTH_BIT) >> 3) & FIRST_BIT;
+    lub_lcd_data = Read_LCD_Data();
+    lub_temp = ( lub_lcd_data & (~(MASK_LOW_HALF_BYTE))) | lub_high_byte;
+    Set_LCD_Data( DATA_0 , ((lub_temp & FIRST_BIT)  >> DATA_0) & FIRST_BIT );
+    Set_LCD_Data( DATA_1 , ((lub_temp & SECOND_BIT) >> DATA_1) & FIRST_BIT );
+    Set_LCD_Data( DATA_2 , ((lub_temp & THIRD_BIT)  >> DATA_2) & FIRST_BIT );
+    Set_LCD_Data( DATA_3 , ((lub_temp & FOURTH_BIT) >> DATA_3) & FIRST_BIT );
 	
     delay_1u();			
     
-    CLEAR_E(); 	/* Now that the data lines are stable, E is pulled low for transmission */
+    Set_LCD_E(RESET); 	/* Now that the data lines are stable, E is pulled low for transmission */
 
     delay_1u();
 
-    SET_E(); 	/* Send the lower nibble */
+    Set_LCD_E(SET); 	/* Send the lower nibble */
 
-    lub_temp = ( (LCD_DATA_STATE_0 +  (LCD_DATA_STATE_1<<1) + (LCD_DATA_STATE_2<<2) +  (LCD_DATA_STATE_3<<3)) & (~(0X0F)))|(lub_low_byte);
-    LCD_DATA_0 = lub_temp & FIRST_BIT;
-	LCD_DATA_1 = ((lub_temp & SECOND_BIT) >> 1) & FIRST_BIT;
-    LCD_DATA_2 = ((lub_temp & THIRD_BIT)  >> 2) & FIRST_BIT;
-	LCD_DATA_3 = ((lub_temp & FOURTH_BIT) >> 3) & FIRST_BIT;
+    lub_lcd_data = Read_LCD_Data();
+    lub_temp = ( lub_lcd_data & (~(MASK_LOW_HALF_BYTE))) | lub_low_byte;
+    Set_LCD_Data( DATA_0 , ((lub_temp & FIRST_BIT)  >> DATA_0) & FIRST_BIT );
+    Set_LCD_Data( DATA_1 , ((lub_temp & SECOND_BIT) >> DATA_1) & FIRST_BIT );
+    Set_LCD_Data( DATA_2 , ((lub_temp & THIRD_BIT)  >> DATA_2) & FIRST_BIT );
+    Set_LCD_Data( DATA_3 , ((lub_temp & FOURTH_BIT) >> DATA_3) & FIRST_BIT );
 
     delay_1u();			
 
-    CLEAR_E(); /* The transmission of the lower nibble is done */
+    Set_LCD_E(RESET); /* The transmission of the lower nibble is done */
 
     delay_1u();		
 
@@ -206,7 +184,7 @@ void LCDByte(T_UBYTE lub_byte, T_UBYTE lub_isdata)
 }
 
 /*==============================================================================
-* Function: 
+* Function: LCDBusyLoop
 * 
 * Description: 
 *
@@ -215,37 +193,32 @@ void LCDBusyLoop(){
 	
     T_UBYTE lub_temp, lub_busy, lub_status;
 
-    /* Set Data lines as INPUT */
-	LCD_DATA_TRIS_0 = INPUT;
-	LCD_DATA_TRIS_1 = INPUT;
-	LCD_DATA_TRIS_2 = INPUT;
-	LCD_DATA_TRIS_3 = INPUT;
+	Set_LCD_Data_Input();    /* Set Data lines as INPUT */
 	
     /* Change LCD mode */
-    SET_RW();		/* Read mode */
-    CLEAR_RS();		/* Read status */
+	Set_LCD_RW(SET);		/* Read mode */
+    Set_LCD_RS(RESET);		/* Read status */
 
     /*Let the RW/RS lines stabilize */
     delay_500n();	
     
 	do{
-		SET_E();
+		Set_LCD_E(SET);
 
-		
 		delay_500n();	 /* Wait for data to become available */
 
-		lub_status = ( LCD_DATA_STATE_0 ) +  ( LCD_DATA_STATE_1<<1 ) + ( LCD_DATA_STATE_2<<2 ) +  ( LCD_DATA_STATE_3<<3 );
-		lub_status = lub_status<<4;
+		lub_status = Read_LCD_Data();
+		lub_status = lub_status << 4;
 
 		delay_500n();	
 
-		CLEAR_E();
+		Set_LCD_E(RESET);
 		delay_1u();
 
-		SET_E();
+		Set_LCD_E(SET);
 		delay_500n();	
 
-		lub_temp = ( LCD_DATA_STATE_0 ) +  ( LCD_DATA_STATE_1<<1 ) + ( LCD_DATA_STATE_2<<2 ) +  ( LCD_DATA_STATE_3<<3 );
+		lub_temp = Read_LCD_Data();
 		lub_temp &= MASK_LOW_HALF_BYTE;
 
 		lub_status = lub_status | lub_temp;
@@ -254,188 +227,106 @@ void LCDBusyLoop(){
 
 		delay_500n();	
 
-		CLEAR_E();
+		Set_LCD_E(RESET);
 		delay_1u();
 			
     }while(lub_busy);
 
-    CLEAR_RW();		/* Write mode */
-
-	/* Set Data lines as OUTPUTS */
-	LCD_DATA_TRIS_0 = OUTPUT;
-	LCD_DATA_TRIS_1 = OUTPUT;
-	LCD_DATA_TRIS_2 = OUTPUT;
-	LCD_DATA_TRIS_3 = OUTPUT;
-	
+	Set_LCD_RW(RESET);      /* Write mode */
+    Set_LCD_Data_Output();  /* Set Data lines as OUTPUTS */	
 }
 
 /*==============================================================================
-* Function: 
+* Function: LCDInit
 * 
-* Description: 
+* Description: This function initializes the LCD module. This must be called
+* before calling LCD related functions.
 *
 ==============================================================================*/
 void LCDInit(T_UBYTE lub_style){
-	
-	/*****************************************************************
-
-	This function Initializes the lcd module
-	must be called before calling lcd related functions
-
-	Arguments:
-	style = LS_BLINK,LS_ULINE(can be "OR"ed for combination)
-	LS_BLINK : The cursor is blinking type
-	LS_ULINE : Cursor is "underline" type else "block" type
-        LS_NONE : No visible cursor
-
-	*****************************************************************/
 
 	T_UBYTE lub_i;
 
 	T_UBYTE lub_custom_char[]=
 	{
-		0x0C, 0x12, 0x12, 0x0C, 0x00, 0x00, 0x00, 0x00, //Char0 degree symbol
-		0x01, 0x07, 0x1F, 0x1F, 0x1F, 0x1F, 0x19, 0x00, //Char1 
-		0x1F, 0x00, 0x0E, 0x0E, 0x0E, 0x00, 0x1F, 0x00, //Char2
-		0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x00, //Char3
-		0x03, 0x02, 0x0E, 0x0A, 0x0E, 0x02, 0x03, 0x00, //Char4
-		0x10, 0x1C, 0x1F, 0x1F, 0x1F, 0x1F, 0x13, 0x00, //Char5 -
-		0x03, 0x06, 0x0E, 0x0F, 0x1E, 0x1C, 0x19, 0x1A, //Char6 s
-		0x18, 0x0C, 0x0E, 0x1E, 0x0F, 0x17, 0x03, 0x03, //Char7
-		//0x1C, 0x1B, 0x1C, 0x0D, 0x0D, 0x0D, 0x07, 0x03, //Char8
-	//	0x07, 0x13, 0x0F, 0x16, 0x16, 0x16, 0x1C, 0x18, //Char9
+		0x0C, 0x12, 0x12, 0x0C, 0x00, 0x00, 0x00, 0x00, /* Char0 - Degree symbol */
+		0x01, 0x07, 0x1F, 0x1F, 0x1F, 0x1F, 0x19, 0x00, /* Char1 - Seat belt 1   */
+		0x1F, 0x00, 0x0E, 0x0E, 0x0E, 0x00, 0x1F, 0x00, /* Char2 - Seat belt 2 	 */
+		0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x00, /* Char3 - Seat belt 3   */
+		0x03, 0x02, 0x0E, 0x0A, 0x0E, 0x02, 0x03, 0x00, /* Char4 - Seat belt 4   */
+		0x10, 0x1C, 0x1F, 0x1F, 0x1F, 0x1F, 0x13, 0x00, /* Char5 - Seat belt 5   */
+		0x03, 0x06, 0x0E, 0x0F, 0x1E, 0x1C, 0x19, 0x1A, /* Char6 				 */
+		0x18, 0x0C, 0x0E, 0x1E, 0x0F, 0x17, 0x03, 0x03, /* Char7				 */
 	};
         
 	
 
-	delay_30ms(); /* After power on Wait for LCD to Initialize */
+	delay_30ms(); 							/* After power on, wait for LCD to initialize	*/
+	Set_LCD_E(SET);							/* Set ENABLE signal pin						*/
+	Set_LCD_Data(DATA_1, FOUR_BIT_MODE);  	/* Set 4-bit mode 								*/ 
+	delay_1u();								/* Delay one microsecond						*/
+	Set_LCD_E(RESET);						/* Reset ENABLE signal pin						*/
+	delay_1u();								/* Delay one microsecond						*/
 	
-	/* Set Data lines as OUTPUTS */
-	LCD_DATA_TRIS_0 = OUTPUT;
-	LCD_DATA_TRIS_1 = OUTPUT;
-	LCD_DATA_TRIS_2 = OUTPUT;
-	LCD_DATA_TRIS_3 = OUTPUT;
-
-	/* Set control lines as OUTPUTS */
-	LCD_E_TRIS  = OUTPUT;   
-	LCD_RS_TRIS = OUTPUT; 
-	LCD_RW_TRIS = OUTPUT;  
-
-	/* Clear all the lines */
-	LCD_DATA_0 = CLEAR;
-	LCD_DATA_1 = CLEAR;
-	LCD_DATA_2 = CLEAR;
-	LCD_DATA_3 = CLEAR;
-	
-    CLEAR_E();
-	CLEAR_RW();
-	CLEAR_RS();
-	
-	delay_500n();
-
-	SET_E();
-	LCD_DATA_1 = FOUR_BIT_MODE;  /* Set 4-bit mode */
-	delay_1u();
-	CLEAR_E();
-	delay_1u();
-
-	
-	LCDBusyLoop(); /* Wait for LCD */ 
+	LCDBusyLoop();							/* Wait for LCD									*/ 
 
 	/* Now the LCD is in 4-bit mode */
 
-	LCDCmd(FOUR_BIT_TWO_LINE_FORMAT); /* Function set 4-bit, 2 line 5x7 dot format  */
-    LCDCmd(DISPLAY_ON | lub_style);	  /* Display On									*/
+	LCDCmd(FOUR_BIT_TWO_LINE_FORMAT);		/* Function set 4-bit, 2 line 5x7 dot format  	*/
+    LCDCmd(DISPLAY_ON | lub_style);	  		/* Display On									*/
 
-	/* Custom Char */
-    LCDCmd(SET_CUSTOM_CHARS);
+    LCDCmd(SET_CUSTOM_CHARS);				/* Set Custom Char								*/
 
 
 	for(lub_i=0; lub_i<sizeof(lub_custom_char); lub_i++){
-		LCDData(lub_custom_char[lub_i]);
+		LCDData(lub_custom_char[lub_i]);	/* Set each of the custom chars					*/
 	}
 
 }
+
 /*==============================================================================
-* Function: 
+* Function: LCDWriteString
 * 
-* Description: 
+* Description: Function that receives a string to print it in the LCD.
 *
 ==============================================================================*/
-void LCDWriteString(const char *msg)
-{
-	/*****************************************************************
-
-	This function Writes a given string to lcd at the current cursor
-	location.
-
-	Arguments:
-	msg: a null terminated C style string to print
-
-	There are 8 custom char in the LCD they can be defined using
-	"LCD Custom Character Builder" PC Software.
-
-	You can print custom character using the % symbol. For example
-	to print custom char number 0 (which is a degree symbol), you
-	need to write
-
-	LCDWriteString("Temp is 30%0C");
-                                  ^^
-                                   |----> %0 will be replaced by
-                                          custom char 0.
-
-	So it will be printed like.
-
-		Temp is 30°C
-
-	In the same way you can insert any symbols numbered 0-7
-
-
-	*****************************************************************/
+void LCDWriteString(const char *cpub_msg){
+	
 	T_UBYTE lub_cc_support;
 	
-	while(*msg!='\0'){
-		if(*msg=='%'){ 	/*Custom Char Support */
-			msg++;
-			lub_cc_support = (T_UBYTE)(*msg-'0');
-		
-			if( lub_cc_support>=0 && lub_cc_support<=7 ){
-				LCDData(lub_cc_support);
+	while(*cpub_msg != '\0'){
+		if(*cpub_msg == '%'){ 							 /* Custom Char Support								    */
+			cpub_msg++;				/* Pointer position is incremented to point at the index of the custom char */
+			lub_cc_support = (T_UBYTE)(*cpub_msg - '0'); /* Get the numeric value of the char variable          */
+			
+			/* Make sure it is a valid index */
+			if( lub_cc_support >= MIN_VALID_INDEX && lub_cc_support <= MAX_VALID_INDEX ){ 	
+				LCDData(lub_cc_support);			 	 /* Print the selected custom char	  					 */
 			}else{
-				LCDData('%');
-				LCDData(*msg);
+				LCDData('%');							 /* Print the percentage sign if it is not a valid index */
+				LCDData(*cpub_msg);						 /* Print the invalid index								 */
 			}
-		}else{
-			LCDData(*msg);
+		}else{										  
+			LCDData(*cpub_msg); 						 /* Print the received char								 */
 		}
-		msg++;
+		cpub_msg++;							/* Pointer position is incremented to point at the next char value   */
 	}
 }
 /*==============================================================================
 * Function: LCDWriteInt
 * 
-* Description: 
+* Description: Function that receives a number and a field length to print it
+* in the LCD.
 *
 ==============================================================================*/
 void LCDWriteInt(T_UBYTE lub_val, T_SBYTE lsb_field_length){
 	
-	/***************************************************************
-	This function writes a integer type value to LCD module
-
-	Arguments:
-	1)int val	: Value to print
-
-	2)unsigned int field_length :total length of field in which the value is printed
-	must be between 1-5 if it is -1 the field length is no of digits in the val
-
-	****************************************************************/
-
-	T_UBYTE laub_str[5] = {0,0,0,0,0};
+	T_UBYTE laub_str[MAX_FIELD_LENGTH] = {0,0,0,0,0};	/* Array to save the bytes of the 						 */
 	T_UBYTE lub_i = 4, lub_j = 0;
 
 	while(lub_val){
-		laub_str[lub_i] = lub_val%10;
-		lub_val = lub_val/10;
+		laub_str[lub_i] = lub_val % TENTH;
+		lub_val = lub_val / TENTH;
 		lub_i--;
 	}
 	if(lsb_field_length == -1){
@@ -443,19 +334,20 @@ void LCDWriteInt(T_UBYTE lub_val, T_SBYTE lsb_field_length){
 			lub_j++;
 		}
 	}else{
-		lub_j = (unsigned char)(5 - lsb_field_length);
+		lub_j = (unsigned char)(MAX_FIELD_LENGTH - lsb_field_length);
 	}
 
-	for(lub_i=lub_j; lub_i<5; lub_i++){
-		LCDData(48 + laub_str[lub_i]);
+	for(lub_i = lub_j; lub_i < MAX_FIELD_LENGTH; lub_i++){
+		LCDData(DATA_OFFSET + laub_str[lub_i]);
 	}
 	
 }
-/********************************************************************
-
-Position the cursor to specific part of the screen
-
-********************************************************************/
+/*==============================================================================
+* Function: LCDGotoXY
+* 
+* Description: Set the position of the cursor to an specific part of the screen.
+*
+==============================================================================*/
 void LCDGotoXY(T_UBYTE lub_x, T_UBYTE lub_y){
 	
  	if(lub_x >= MAX_X_VALUE){

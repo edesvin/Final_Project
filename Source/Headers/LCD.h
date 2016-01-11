@@ -49,6 +49,7 @@
 /*============================================================================*/
 #include "MPC5606B.h"
 #include "typedefs.h"
+#include "Timer.h"
 
 #ifdef	__cplusplus
 extern "C" {
