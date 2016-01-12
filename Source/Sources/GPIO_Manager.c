@@ -44,9 +44,11 @@
 /* Includes */
 /*============================================================================*/
 #include "GPIO_Manager.h"
+
 /* Defines */
 /*============================================================================*/
-
+#define LED_OFF 1
+#define LED_ON	0
 /*==============================================================================
 * Function: Init_GPIO
 * 
@@ -57,9 +59,9 @@ void Init_GPIO (void){
 	
 	T_UBYTE lub_i = 0;
 	
-	for(lub_i = 0; lub_i <= 3; lub_i++){	/*	7 segment displays initialization */	
+	for(lub_i = 0; lub_i <= 3; lub_i++){	
 		Set_Pin_Mode(BOARD_LEDS + lub_i, OUT);
-		Set_Pin_State( BOARD_LEDS + lub_i, OFF);
+		Set_Pin_State( BOARD_LEDS + lub_i, LED_OFF);
 	}
 	
 	/*	Input configuration*/
@@ -101,7 +103,6 @@ void Set_LCD_Data_Output(void){
 	T_UBYTE lub_i = 0;
 	for(lub_i = 0; lub_i <= 3; lub_i++){
 		Set_Pin_Mode(PORTF + lub_i, OUT);
-		Set_Pin_State( PORTF + lub_i, OFF);
 	}
 	
 }
@@ -160,9 +161,9 @@ void Set_LCD_RS(T_UBYTE State){
 ==============================================================================*/
 T_UBYTE Read_LCD_Data(void){
 	
-
+	//Get_Pin_State_IN(PIN_LCD_DATA_0);
 	return (Get_Pin_State_IN(PIN_LCD_DATA_0) +  (Get_Pin_State_IN(PIN_LCD_DATA_1)<<1) + (Get_Pin_State_IN(PIN_LCD_DATA_2)<<2) +  (Get_Pin_State_IN(PIN_LCD_DATA_3)<<3));
-
+	//return (LCD_DATA_STATE_0 +  (LCD_DATA_STATE_1<<1) + (LCD_DATA_STATE_2<<2) +  (LCD_DATA_STATE_3<<3));
 	
 }
 /*==============================================================================
