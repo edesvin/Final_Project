@@ -46,6 +46,15 @@
 /*============================================================================*/
 #include "GPIO_Manager.h"
 
+
+typedef struct{
+	T_UBYTE Opened_Doors	: 1;
+	T_UBYTE Seat_Belt	 	: 1;
+	T_UBYTE Fuel_Reserve	: 1;
+	T_UBYTE High_Beams 	 	: 1;
+	T_UBYTE Emergency_Break : 1;
+	
+}T_STRUCT_INDICATORS;
 /* Public functions */
 /*============================================================================*/
 void Update_speedometer (void);
