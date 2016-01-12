@@ -5,12 +5,12 @@
 /*============================================================================*/
 /*!
  * $Source: LCD.c $
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * &Project: Cluster_EA $
  * $Author: 	Edgar Escayola Vinagre	$
  * 				Adrian Zacarias Siete 	$
  *				
- * $Date: 11-01-2016 $
+ * $Date: 12-01-2016 $
  */
 /*============================================================================*/
 /* DESCRIPTION :                                                              */
@@ -34,7 +34,7 @@
 /*============================================================================*/
 /*  DATABASE           |        PROJECT     | FILE VERSION (AND INSTANCE)     */
 /*----------------------------------------------------------------------------*/
-/*                     |      Cluster_EA    |           1.4                   */
+/*                     |      Cluster_EA    |           1.5                   */
 /*============================================================================*/
 /*                               OBJECT HISTORY                               */
 /*============================================================================*/
@@ -83,6 +83,10 @@ void delay_1us(void);
 void delay_500ns(void);
 void delay_30ms(void);
 void LCDBusyLoop(void);
+void LCDWriteString(const char *);
+void LCDWriteInt(T_UBYTE, T_SBYTE);
+void LCDGotoXY(T_UBYTE, T_UBYTE);
+
 /* Private functions */
 /*==============================================================================
 * Function: delay_1us
@@ -121,6 +125,28 @@ void delay_30ms(void){
 	while( STM_VALUE <= STM_30ms ){	/* Wait for the STM counter 	*/
 		/* Wait for 30 ms */
 	}
+}
+
+/*==============================================================================
+* Function: LCDWriteStringXY
+* 
+* Description: Function that receives the position and the string to be printed.
+*
+==============================================================================*/
+void LCDWriteStringXY(T_UBYTE lub_x, T_UBYTE lub_y, const char *cpub_msg){
+	 LCDGotoXY(lub_x, lub_y);		/* Set the position of the cursor   */
+	 LCDWriteString(cpub_msg);		/* Print the string 				*/
+}
+
+/*==============================================================================
+* Function: LCDWriteIntXY
+* 
+* Description: Function that receives the position and value to be printed.
+*
+==============================================================================*/
+void LCDWriteIntXY(T_UBYTE lub_x, T_UBYTE lub_y, T_UBYTE lub_val, T_UBYTE lub_f1);
+	 LCDGotoXY(lub_x, lub_y);			/* Set the position of the cursor */
+	 LCDWriteInt(lub_val, lub_fl); 		/* Print the value				  */
 }
 
 /*==============================================================================
@@ -249,6 +275,18 @@ void LCDInit(T_UBYTE lub_style){
 	
 
 	delay_30ms(); 							/* After power on, wait for LCD to initialize	*/
+	
+	for(lub_i = 0; lub_i < sizeof(lub_custom_char); lub_i++){
+		Set_LCD_E(SET);						/* Set ENABLE signal pin						*/
+		Set_LCD_Data(DATA_0, 1);			/* Set 8-bit mode 								*/ 
+		Set_LCD_Data(DATA_1, 1);			/* Set 8-bit mode 								*/ 
+		delay_1us();						/* Delay one microsecond						*/
+		Set_LCD_E(RESET);					/* Reset ENABLE signal pin						*/
+		delay_1us();						/* Delay one microsecond						*/
+	}
+	
+	/* Now the LCD is in 8-bit mode */
+	
 	Set_LCD_E(SET);							/* Set ENABLE signal pin						*/
 	Set_LCD_Data(DATA_1, FOUR_BIT_MODE);  	/* Set 4-bit mode 								*/ 
 	delay_1us();							/* Delay one microsecond						*/
@@ -265,7 +303,7 @@ void LCDInit(T_UBYTE lub_style){
     LCDCmd(SET_CUSTOM_CHARS);				/* Set Custom Char								*/
 
 
-	for(lub_i=0; lub_i<sizeof(lub_custom_char); lub_i++){
+	for(lub_i = 0; lub_i < sizeof(lub_custom_char); lub_i++){
 		LCDData(lub_custom_char[lub_i]);	/* Set each of the custom chars					*/
 	}
 
