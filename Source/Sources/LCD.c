@@ -5,7 +5,7 @@
 /*============================================================================*/
 /*!
  * $Source: LCD.c $
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * &Project: Cluster_EA $
  * $Author: 	Edgar Escayola Vinagre	$
  * 				Adrian Zacarias Siete 	$
@@ -34,7 +34,7 @@
 /*============================================================================*/
 /*  DATABASE           |        PROJECT     | FILE VERSION (AND INSTANCE)     */
 /*----------------------------------------------------------------------------*/
-/*                     |      Cluster_EA    |           1.3                   */
+/*                     |      Cluster_EA    |           1.4                   */
 /*============================================================================*/
 /*                               OBJECT HISTORY                               */
 /*============================================================================*/
@@ -79,18 +79,18 @@
 
 /* Private functions prototypes */
 /*============================================================================*/
-void delay_1u(void);
-void delay_500n(void);
+void delay_1us(void);
+void delay_500ns(void);
 void delay_30ms(void);
-
+void LCDBusyLoop(void);
 /* Private functions */
 /*==============================================================================
-* Function: delay_1u
+* Function: delay_1us
 * 
 * Description: Function that makes a delay of one microsecond.
 *
 ==============================================================================*/
-void delay_1u(void){
+void delay_1us(void){
 	Clear_STM();					/* Reset STM counter			*/	
 	while( STM_VALUE <= STM_1us ){  /* Wait for the STM counter 	*/
 		/* Wait for 1 us */
@@ -98,12 +98,12 @@ void delay_1u(void){
 }
 
 /*==============================================================================
-* Function: delay_500n 
+* Function: delay_500ns 
 * 
 * Description: Function that makes a delay of 500 nanoseconds.
 *
 ==============================================================================*/
-void delay_500n(void){
+void delay_500ns(void){
 	Clear_STM();					 /* Reset STM counter			*/	
 	while( STM_VALUE <= STM_500ns ){ /* Wait for the STM counter 	*/
 		/* Wait for 500 ns */
@@ -143,7 +143,7 @@ void LCDByte(T_UBYTE lub_byte, T_UBYTE lub_isdata){
 		Set_LCD_RS(SET);				/* Set LCD Register Select pin							*/
 	}
 	
-    delay_500n();						/* Delay of 500 nanoseconds.							*/
+    delay_500ns();						/* Delay of 500 nanoseconds.							*/
     Set_LCD_E(SET);						/* Set LCD Enable pin									*/
 
     lub_lcd_data = Read_LCD_Data();												/* Read the state of the LCD Data pins	*/
@@ -153,9 +153,9 @@ void LCDByte(T_UBYTE lub_byte, T_UBYTE lub_isdata){
     Set_LCD_Data( DATA_2 , ((lub_temp & THIRD_BIT)  >> DATA_2) & FIRST_BIT );	/* Set LCD Data pin 0					*/
     Set_LCD_Data( DATA_3 , ((lub_temp & FOURTH_BIT) >> DATA_3) & FIRST_BIT );	/* Set LCD Data pin 0					*/
 	
-    delay_1u();			/* Delay of one microsecond.											 */
+    delay_1us();		/* Delay of one microsecond.											 */
     Set_LCD_E(RESET); 	/* Now that the data lines are stable, E is pulled low for transmission. */
-    delay_1u();			/* Delay of one microsecond.											 */
+    delay_1us();		/* Delay of one microsecond.											 */
     Set_LCD_E(SET); 	/* Send the lower nibble.												 */
 
     lub_lcd_data = Read_LCD_Data();												/* Read the state of the LCD Data pins	*/
@@ -165,9 +165,9 @@ void LCDByte(T_UBYTE lub_byte, T_UBYTE lub_isdata){
     Set_LCD_Data( DATA_2 , ((lub_temp & THIRD_BIT)  >> DATA_2) & FIRST_BIT );	/* Set LCD Data pin 0					*/
     Set_LCD_Data( DATA_3 , ((lub_temp & FOURTH_BIT) >> DATA_3) & FIRST_BIT );	/* Set LCD Data pin 0					*/
 
-    delay_1u(); 	  /* Delay of one microsecond.						 */
+    delay_1us(); 	  /* Delay of one microsecond.						 */
     Set_LCD_E(RESET); /* The transmission of the lower nibble is done. 	 */
-    delay_1u();		  /* Delay of one microsecond.						 */
+    delay_1us();	  /* Delay of one microsecond.						 */
 
     LCDBusyLoop();    /* Check whether the LCD is Busy. 				 */
     
@@ -190,22 +190,22 @@ void LCDBusyLoop(){
     Set_LCD_RS(RESET);		/* Read status 											  */
 
     /*Let the RW/RS lines stabilize */
-    delay_500n();			/* Delay of 500 nanoseconds. 			    			  */
+    delay_500ns();			/* Delay of 500 nanoseconds. 			    			  */
      
 	do{
 		Set_LCD_E(SET);	 	/* Set LCD Enable pin									  */
 
-		delay_500n();	 	/* Wait 500 nanoseconds for data to become available 	  */
+		delay_500ns();	 	/* Wait 500 nanoseconds for data to become available 	  */
 
 		lub_status = Read_LCD_Data();	/* Read LCD data pins					      */
 		lub_status = lub_status << 4;   /* Move four bits the LCD data 			      */
 
-		delay_500n();		/* Delay of 500 nanoseconds.							  */
+		delay_500ns();		/* Delay of 500 nanoseconds.							  */
 
 		Set_LCD_E(RESET);	/* Reset LCD Enable pin								      */
-		delay_1u();			/* Delay of one microsecond.							  */
+		delay_1us();		/* Delay of one microsecond.							  */
 		Set_LCD_E(SET);		/* Set LCD Enable pin								      */
-		delay_500n();		/* Delay of 500 nanoseconds.						      */
+		delay_500ns();		/* Delay of 500 nanoseconds.						      */
 
 		lub_temp = Read_LCD_Data();		/* Read the state of the LCD Data pins		  */
 		lub_temp &= MASK_LOW_HALF_BYTE; /* Mask data's low half 					  */
@@ -213,9 +213,9 @@ void LCDBusyLoop(){
 		lub_status = lub_status | lub_temp; /* Compare status and the data's low half */
 		lub_busy = lub_status & MASK_0X80;	/* Mask status variable					  */
 
-		delay_500n();		/* Delay of 500 nanoseconds.							  */
+		delay_500ns();		/* Delay of 500 nanoseconds.							  */
 		Set_LCD_E(RESET);	/* Reset LCD Enable pin								      */
-		delay_1u();			/* Delay of one microsecond.							  */
+		delay_1us();		/* Delay of one microsecond.							  */
 			
     }while(lub_busy);		/* Repeat the cycle while the LCD is still busy			  */
 
@@ -251,9 +251,9 @@ void LCDInit(T_UBYTE lub_style){
 	delay_30ms(); 							/* After power on, wait for LCD to initialize	*/
 	Set_LCD_E(SET);							/* Set ENABLE signal pin						*/
 	Set_LCD_Data(DATA_1, FOUR_BIT_MODE);  	/* Set 4-bit mode 								*/ 
-	delay_1u();								/* Delay one microsecond						*/
+	delay_1us();							/* Delay one microsecond						*/
 	Set_LCD_E(RESET);						/* Reset ENABLE signal pin						*/
-	delay_1u();								/* Delay one microsecond						*/
+	delay_1us();							/* Delay one microsecond						*/
 	
 	LCDBusyLoop();							/* Wait for LCD									*/ 
 

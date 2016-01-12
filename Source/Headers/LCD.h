@@ -8,12 +8,12 @@
 /*============================================================================*/
 /*!
  * $Source: LCD.h $
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * &Project: Cluster_EA $
  * $Author: 	Edgar Escayola Vinagre	$
  * 				Adrian Zacarias Siete 	$
  *				
- * $Date: 07-01-2016 $
+ * $Date: 11-01-2016 $
  */
 /*============================================================================*/
 /* DESCRIPTION :                                                              */
@@ -37,7 +37,7 @@
 /*============================================================================*/
 /*  DATABASE           |        PROJECT     | FILE VERSION (AND INSTANCE)     */
 /*----------------------------------------------------------------------------*/
-/*                     |      Cluster_EA    |           1.1                   */
+/*                     |      Cluster_EA    |           1.2                   */
 /*============================================================================*/
 /*                               OBJECT HISTORY                               */
 /*============================================================================*/
@@ -70,9 +70,7 @@ void LCDInit(T_UBYTE);
 void LCDWriteString(const char *);
 void LCDWriteInt(T_UBYTE, T_SBYTE);
 void LCDGotoXY(T_UBYTE, T_UBYTE);
-void initSTM(void);
 void LCDByte(T_UBYTE, T_UBYTE);
-void LCDBusyLoop();
 
 #define LCDCmd(c) (LCDByte(c,0))
 #define LCDData(d) (LCDByte(d,1))
