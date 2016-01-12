@@ -5,7 +5,7 @@
 /*============================================================================*/
 /*!
  * $Source: LCD.c $
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  * &Project: Cluster_EA $
  * $Author: 	Edgar Escayola Vinagre	$
  * 				Adrian Zacarias Siete 	$
@@ -34,7 +34,7 @@
 /*============================================================================*/
 /*  DATABASE           |        PROJECT     | FILE VERSION (AND INSTANCE)     */
 /*----------------------------------------------------------------------------*/
-/*                     |      Cluster_EA    |           1.5                   */
+/*                     |      Cluster_EA    |           1.6                   */
 /*============================================================================*/
 /*                               OBJECT HISTORY                               */
 /*============================================================================*/
@@ -144,9 +144,9 @@ void LCDWriteStringXY(T_UBYTE lub_x, T_UBYTE lub_y, const char *cpub_msg){
 * Description: Function that receives the position and value to be printed.
 *
 ==============================================================================*/
-void LCDWriteIntXY(T_UBYTE lub_x, T_UBYTE lub_y, T_UBYTE lub_val, T_SBYTE lub_f1){
+void LCDWriteIntXY(T_UBYTE lub_x, T_UBYTE lub_y, T_UBYTE lub_val, T_SBYTE lub_fl){
 	 LCDGotoXY(lub_x, lub_y);			/* Set the position of the cursor */
-	 LCDWriteInt(lub_val, lub_f1); 		/* Print the value				  */
+	 LCDWriteInt(lub_val, lub_fl); 		/* Print the value				  */
 }
 
 /*==============================================================================
