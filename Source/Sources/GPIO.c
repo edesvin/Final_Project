@@ -44,7 +44,7 @@
 
 /* Includes */
 /*============================================================================*/
-#include "GPIO_Manager.h"
+#include "GPIO.h"
 /* Defines */
 /*============================================================================*/
 #define R_OUTPUT 	0x0200
@@ -66,7 +66,7 @@ typedef enum{
 ==============================================================================*/
 void Set_Pin_State (T_UBYTE lub_PIN, T_UBYTE lub_STATE){
 	
-	SIU.GPDO[lub_PIN].B.PDO = !lub_STATE;
+	SIU.GPDO[lub_PIN].B.PDO = lub_STATE;
 
 }
 /*==============================================================================
@@ -103,7 +103,7 @@ void Set_Pin_Mode (T_UBYTE lub_PIN, T_UBYTE lub_MODE ){
 	}
 }
 /*==============================================================================
-* Function: Get_Pin_State
+* Function: Get_Pin_State_IN
 * 
 * Description: This function returns the state of the given pin.
 *
@@ -112,7 +112,12 @@ T_UBYTE Get_Pin_State_IN (T_UBYTE lub_PIN){
 	
 	return SIU.GPDI[lub_PIN].B.PDI;
 }
-/*==============================================================================*/
+/*==============================================================================
+* Function: Get_Pin_State_OUT
+* 
+* Description: This function returns the state of the given pin.
+*
+==============================================================================*/
 T_UBYTE Get_Pin_State_OUT (T_UBYTE lub_PIN){
 	
 	return !SIU.GPDO[lub_PIN].B.PDO;
