@@ -51,7 +51,7 @@
 #define ISR_PIT_CH0 	59
 #define PRIORITY_5 		5
 #define CHANNEL_0		0
-#define STM_VALUE 		STM.CNT.R
+
 #define CLEAR 			0x00
 /* Private functions */
 /*============================================================================*/

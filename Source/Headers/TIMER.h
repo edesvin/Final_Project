@@ -49,8 +49,10 @@
 #include "MPC5606B.h"
 #include "Kernel.h"
 
+#define STM_VALUE 		STM.CNT.R
 /* Public functions */
 /*============================================================================*/
 void InitPIT (void);
 void InitSTM (void);
+void Clear_STM(void);
 #endif /* TIMER_H_ */
