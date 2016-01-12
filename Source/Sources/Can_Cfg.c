@@ -59,26 +59,29 @@ CAN_ConfigMsgType bios_cnf_can_messages[] = {
 #ifdef TRANSMITTER	
 	{ 1, CNF_CAN_CH_TX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x052,         0x1F7,      NULL  }, 
 #else
-	{ 1, CNF_CAN_CH_RX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x052,         0x1F7,      Can_Manager_blink0 },
+	{ 1, CNF_CAN_CH_RX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x052,         0x1F7,      CanManager_Receive_Fuel_Level },
 #endif
 #ifdef TRANSMITTER	
 	{ 2, CNF_CAN_CH_TX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x051,         0x1F7,      NULL  },
 #else
-	{ 2, CNF_CAN_CH_RX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x051,         0x1F7,      Can_Manager_toggle  },
+	{ 2, CNF_CAN_CH_RX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x051,         0x1F7,      CanManager_Receive_Odometer_Increment  },
 #endif
 
 	{ 3, CNF_CAN_CH_TX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_EXT, 0x12345600,    0x1FFFFFF8, NULL  },//0 no sirve
 
 	{ 4, CNF_CAN_CH_RX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_EXT, 0x13579B00,    0x00000000, NULL  }, //3 no sirve
 
-
+#ifdef TRANSMITTER
 	{ 5, CNF_CAN_CH_TX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_EXT, 0x12345604,    0x1FFFFFF8, NULL  },
+#else
+	{ 5, CNF_CAN_CH_RX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_EXT, 0x12345604,    0x1FFFFFF8, CanManager_Receive_Speed  },
+#endif
 #ifdef TRANSMITTER
 	{ 6, CNF_CAN_CH_TX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x053,         0x1F7,      NULL  },
 #else
-	{ 6, CNF_CAN_CH_RX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x053,         0x1F7,      Can_Manager_Blink  },
+	{ 6, CNF_CAN_CH_RX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x053,         0x1F7,      CanManager_Receive_Indicators_Status  },
 #endif
-	{ 7, CNF_CAN_CH_TX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_EXT, 0x123456AA,    0x1FFFFFF8, Can_Manager_PduHandler7  },
+	{ 7, CNF_CAN_CH_TX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_EXT, 0x123456AA,    0x1FFFFFF8, NULL  },
 	{ 8, CNF_CAN_CH_TX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_STD, 0x1CF,         0x1FFFFFFF, NULL  },
 	{ 9, CNF_CAN_CH_TX, CNF_CAN_DATA_FRAME, CNF_CAN_IDE_EXT, 0x1A654321,    0x1FFFFFFF, NULL  }
 };

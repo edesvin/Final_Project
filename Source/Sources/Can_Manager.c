@@ -1,161 +1,105 @@
-/*~A*/
-/*~+:Module Header*/
-/*******************************************************************************/
-/**
-\file       Can_Manager.c
-\brief      Provide Can Services
-\author     Francisco Martinez
-\version    1.0
-\date       16/08/2015
+/*============================================================================*/
+/*                        I BS SOFTWARE GROUP                                 */
+/*============================================================================*/
+/*                        OBJECT SPECIFICATION                                */
+/*============================================================================*/
+/*!
+ * $Source: Can_Manager.c $
+ * $Revision: 1.0 $
+ * $Author: Francisco Martinez
+ * $Date: 16/08/2015 $
+ */
+/*============================================================================*/
+/* DESCRIPTION :                                                              */
+/** \file
+*		File where the callback functions for the message buffers are allocated.
 */
-/*******************************************************************************/
-/*~E*/
-/*~A*/
-/*~+:Import*/
+/*============================================================================*/
+/* COPYRIGHT (C) CONTINENTAL AUTOMOTIVE 2014                                  */
+/* AUTOMOTIVE GROUP, Interior Division, Body and Security                     */
+/* ALL RIGHTS RESERVED                                                        */
+/*                                                                            */
+/* The reproduction, transmission, or use of this document or its content is  */
+/* not permitted without express written authority. Offenders will be liable  */
+/* for damages.                                                               */
+/* All rights, including rights created by patent grant or registration of a  */
+/* utility model or design, are reserved.                                     */
+/*                                                                            */
+/*============================================================================*/
+/*============================================================================*/
+/*                    REUSE HISTORY - taken over from                         */
+/*============================================================================*/
+/*  DATABASE           |        PROJECT     | FILE VERSION (AND INSTANCE)     */
+/*----------------------------------------------------------------------------*/
+/*                     |     Cluster_EA     |         1.0                    */
+/*============================================================================*/
+/*                               OBJECT HISTORY                               */
+/*============================================================================*/
+/*
+ * $Log: Can_Manager.c  $
+  ============================================================================*/
+
+/* Includes */
+/*============================================================================*/
 #include "Can_Manager.h"
-#include "GPIO.h"
 
-/*~E*/
-/*~A*/
-/*~+:Defines*/
+/*==============================================================================
+* Function: CanManager_Receive_Fuel_Level
+* 
+* Description: Function that receives the fuel level.
+*
+==============================================================================*/
 
-/*~E*/
-/*~A*/
-/*~+:Variables*/
-
-/* Temporary CAN Data Messages */
-uint8_t dummy_msg0[8] = {0xCA,0x83,0x15,0x77,0x19,0x56,0x65,0x00};
-uint8_t dummy_msg1[8] = {0x00,0x65,0x56,0x19,0x77,0x15,0x83,0xCA};
-uint8_t dummy_msg2[8] = {0x33,0x44,0x55,0x66,0x88,0x89,0x45,0x4C};
-uint8_t dummy_msg8[2] = {0x00,0x00};
-uint8_t dummy_msg9[8] = {0x33,0x44,0x55,0x66,0x88,0x89,0x45,0x4C};
-
-/** PDU: Protocol data unit */
-CAN_PduType    pdu_handler0 = { 1, 2, dummy_msg2};
-CAN_PduType    pdu_handler2 = { 2, 2, dummy_msg2};
-CAN_PduType    pdu_handler6 = { 6, 2, dummy_msg2};
-
-CAN_PduType    pdu_handler4 = { 4, 8, dummy_msg0};
-CAN_PduType    pdu_handler5 = { 5, 6, dummy_msg1};
-CAN_PduType    pdu_handler7 = { 2, 4, dummy_msg2};
-CAN_PduType    pdu_handler8 = { 8, 2, dummy_msg8};
-CAN_PduType    pdu_handler9 = { 9, 8, dummy_msg9};
-
-uint32_t PduHandlerCnt0 = 0;
-uint32_t PduHandlerCnt6 = 0;
-uint16_t pdu_handler8_cnt = 0;
-
-T_UBYTE toggle_now = 1;
-T_UBYTE blink_now = 1;
-T_UBYTE blink0_now = 1;
-/*~E*/
-/*~A*/
-/*~+:Private Operations*/
-
-/*~E*/
-/*~A*/
-/*~+:Public Operations*/
-/*~A*/
-/*~+:Can Manager Callbacks*/
-CAN_MessageDataType CanMessage_PduHandler0;
-CAN_MessageDataType CanMessage_PduHandler7;
-uint8_t msg_rx_pdu0 = 0;
-uint8_t msg_rx_pdu7 = 0;
-
-void Can_Manager_Blink(CAN_MessageDataType CanMessage){
-	blink_now ^= 1;
-	if(blink_now){
-		LED_ON(LED4);
+void CanManager_Receive_Fuel_Level (CAN_MessageDataType CanMessage){
+	if( CanMessage.msg_dlc_field == 2 ){
+		ruw_fuel_level = CanMessage.msg_data_field[0] + (((T_UWORD)(CanMessage.msg_data_field[1]))<<8) & 0xFF00;
 	}else{
-		LED_OFF(LED4);
+		/* Do nothing */
 	}
 }
+/*==============================================================================
+* Function: CanManager_Receive_Odometer_Increment
+* 
+* Description: Function that receives the odometer increment.
+*
+==============================================================================*/
 
-void Can_Manager_toggle(CAN_MessageDataType CanMessage){
-	toggle_now ^= 1;
-	if(toggle_now){
-		LED_ON(LED3);
+void CanManager_Receive_Odometer_Increment (CAN_MessageDataType CanMessage){
+	if( CanMessage.msg_dlc_field == 1 ){
+		rul_odometer += CanMessage.msg_data_field[0];
 	}else{
-		LED_OFF(LED3);
+		/* Do nothing */
 	}
 }
-
-void Can_Manager_blink0(CAN_MessageDataType CanMessage){
-	blink0_now ^= 1;
-	if(blink0_now){
-		LED_ON(LED2);
+/*==============================================================================
+* Function: CanManager_Receive_Speed
+* 
+* Description: Function that receives the speed.
+*
+==============================================================================*/
+void CanManager_Receive_Speed (CAN_MessageDataType CanMessage){
+	if( CanMessage.msg_dlc_field == 2 ){
+		ruw_speed = CanMessage.msg_data_field[0] + (((T_UWORD)(CanMessage.msg_data_field[1]))<<8) & 0xFF00;
 	}else{
-		LED_OFF(LED2);
+		/* Do nothing */
 	}
-}
-void Can_Manager_PduHandler0(CAN_MessageDataType CanMessage)
-{
-	CanMessage_PduHandler0 = CanMessage;
-	pdu_handler7.can_mb_nr = 7;
-	pdu_handler7.can_dlc = CanMessage_PduHandler0.msg_dlc_field;
-	pdu_handler7.can_sdu = CanMessage_PduHandler0.msg_data_field;
-	msg_rx_pdu0 = 1;
-	PduHandlerCnt0++;
 }
 
-void Can_Manager_PduHandler7(CAN_MessageDataType CanMessage)
-{
-	
-	CanMessage_PduHandler7 = CanMessage;
-	msg_rx_pdu7 = 1;
-	pdu_handler8_cnt++;
-	dummy_msg8[0]++;
-	if (256 == pdu_handler8_cnt)
-	{
-		pdu_handler8_cnt = 0;
-		dummy_msg8[0] = 0;
-		dummy_msg8[1]++;
+/*==============================================================================
+* Function: CanManager_Receive_Indicators_Status
+* 
+* Description: Function that receives the state of the indicators.
+*
+==============================================================================*/
+void CanManager_Receive_Indicators_Status (CAN_MessageDataType CanMessage){
+	if( CanMessage.msg_dlc_field == 5 ){
+		rs_indicators.Opened_Doors 		= CanMessage.msg_data_field[0];
+		rs_indicators.Seat_Belt	 		= CanMessage.msg_data_field[1];
+		rs_indicators.Fuel_Reserve		= CanMessage.msg_data_field[2];
+		rs_indicators.High_Beams 		= CanMessage.msg_data_field[3];
+		rs_indicators.Emergency_Break 	= CanMessage.msg_data_field[4];
+	}else{
+		/* Do nothing */
 	}
-	PduHandlerCnt6++;
-}
-
-/*~E*/
-/*~A*/
-/*~+:Can Manager Periodic Functions*/
-/*~A*/
-/*~+:CanManager_SendMesage_12p5ms*/
-CAN_MessageDataType CanMessage_PduHandler2;
-void CanManager_SendMessage_12p5ms(void)
-{
-	CAN_SendFrame(&pdu_handler0);
-	/*if ( 1 == CAN_ReceiveFrame(2, &CanMessage_PduHandler2 )){
-		pdu_handler9.can_mb_nr = 9;
-		pdu_handler9.can_dlc = CanMessage_PduHandler2.msg_dlc_field;
-		pdu_handler9.can_sdu = CanMessage_PduHandler2.msg_data_field;
-		CAN_SendFrame(&pdu_handler9);
-	}*/
-}
-/*~E*/
-/*~A*/
-/*~+:CanManager_SendMesage_25ms*/
-void CanManager_SendMessage_25ms(void)
-{
-	CAN_SendFrame(&pdu_handler6);
-	/*
-	if (msg_rx_pdu0){
-		
-		msg_rx_pdu0 = 0;
-		CAN_SendFrame(&pdu_handler7);
-		
-	}
-	
-	if (msg_rx_pdu7){
-		
-		msg_rx_pdu7 = 0;
-		CAN_SendFrame(&pdu_handler8);
-		
-	}
-*/
-}
-
-/*~+:CanManager_SendMessage_100ms*/
-void CanManager_SendMessage_100ms(void)
-{
-	CAN_SendFrame(&pdu_handler2);
 }
 
