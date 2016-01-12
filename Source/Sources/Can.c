@@ -11,6 +11,7 @@
 /*~+:Imports*/
 #include "Can.h"
 #include "IntcInterrupts.h"
+#include "stdtypedef.h"
 
 /*~+:Defines*/
 /* CAN Engine Devices */
