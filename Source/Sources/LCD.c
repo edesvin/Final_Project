@@ -144,9 +144,9 @@ void LCDWriteStringXY(T_UBYTE lub_x, T_UBYTE lub_y, const char *cpub_msg){
 * Description: Function that receives the position and value to be printed.
 *
 ==============================================================================*/
-void LCDWriteIntXY(T_UBYTE lub_x, T_UBYTE lub_y, T_UBYTE lub_val, T_UBYTE lub_f1);
+void LCDWriteIntXY(T_UBYTE lub_x, T_UBYTE lub_y, T_UBYTE lub_val, T_SBYTE lub_f1){
 	 LCDGotoXY(lub_x, lub_y);			/* Set the position of the cursor */
-	 LCDWriteInt(lub_val, lub_fl); 		/* Print the value				  */
+	 LCDWriteInt(lub_val, lub_f1); 		/* Print the value				  */
 }
 
 /*==============================================================================

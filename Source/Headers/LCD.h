@@ -64,7 +64,7 @@ extern "C" {
 void LCDInit(T_UBYTE);
 void LCDByte(T_UBYTE, T_UBYTE);
 void LCDWriteStringXY(T_UBYTE, T_UBYTE, const char *);
-void LCDWriteIntXY(T_UBYTE, T_UBYTE, T_UBYTE, T_UBYTE);
+void LCDWriteIntXY(T_UBYTE, T_UBYTE, T_UBYTE, T_SBYTE);
 
 /***************************************************
 	M A C R O S
