@@ -49,6 +49,17 @@
 /*============================================================================*/
 #define LED_OFF 1
 #define LED_ON	0
+
+#define TRANSISTOR_1 7
+#define TRANSISTOR_2 8
+#define TRANSISTOR_3 9
+
+T_UBYTE ruw_Display_Selector = 0;
+
+static T_UBYTE ruw_Display_Number1;
+static T_UBYTE ruw_Display_Number2;
+static T_UBYTE ruw_Display_Number3;
+
 /*==============================================================================
 * Function: Init_GPIO
 * 
@@ -161,9 +172,7 @@ void Set_LCD_RS(T_UBYTE State){
 ==============================================================================*/
 T_UBYTE Read_LCD_Data(void){
 	
-	//Get_Pin_State_IN(PIN_LCD_DATA_0);
 	return (Get_Pin_State_IN(PIN_LCD_DATA_0) +  (Get_Pin_State_IN(PIN_LCD_DATA_1)<<1) + (Get_Pin_State_IN(PIN_LCD_DATA_2)<<2) +  (Get_Pin_State_IN(PIN_LCD_DATA_3)<<3));
-	//return (LCD_DATA_STATE_0 +  (LCD_DATA_STATE_1<<1) + (LCD_DATA_STATE_2<<2) +  (LCD_DATA_STATE_3<<3));
 	
 }
 /*==============================================================================
@@ -176,4 +185,116 @@ void Set_LCD_Data(T_UBYTE Data_Pin,T_UBYTE State){
 	
 	Set_Pin_State( PORTF + Data_Pin, State);
 	
+}
+/*==============================================================================
+* Function: Set_LCD_Data
+* 
+* Description: 
+*
+==============================================================================*/
+void Display_Speed(T_UWORD luw_speed){
+
+	Data_Module(luw_speed);
+
+	switch (ruw_Display_Selector){
+		case 0:
+			Set_Transistors(ruw_Display_Selector);
+			Print_Display_Number(ruw_Display_Number1);
+			ruw_Display_Selector = 1;
+			break;
+		case 1:
+			Set_Transistors(ruw_Display_Selector);
+			Print_Display_Number(ruw_Display_Number2);
+			ruw_Display_Selector = 2;
+			break;
+		case 2:
+			Set_Transistors(ruw_Display_Selector);			
+			Print_Display_Number(ruw_Display_Number3);
+			ruw_Display_Selector = 0;
+			break;
+		default:
+			/* Do nothing */
+			break;
+		
+	}
+
+}
+/*==============================================================================
+* Function: Data_Module
+* 
+* Description: 
+*
+==============================================================================*/
+void Data_Module(T_UWORD luw_Data){
+	
+	ruw_Display_Number1 = luw_Data / 100;
+	luw_Data = luw_Data % 100;
+	ruw_Display_Number2 = luw_Data / 10;
+	ruw_Display_Number3 = luw_Data % 10;
+	
+}
+/*==============================================================================
+* Function: Set_Transistors
+* 
+* Description: 
+*
+==============================================================================*/
+void Set_Transistors(T_UBYTE lub_transistor){
+	
+	T_UBYTE lub_i;
+	
+	for(lub_i = 0; lub_i<=2; lub_i++){
+		Set_Pin_State(TRANSISTOR_1 + lub_i, OFF);
+	}
+	
+	switch(lub_transistor){
+		case 0:
+			Set_Pin_State(TRANSISTOR_1, ON);
+			break;
+		case 1:
+			Set_Pin_State(TRANSISTOR_2, ON);
+			break;
+		case 2:
+			Set_Pin_State(TRANSISTOR_3, ON);
+			break;
+		default:
+			break;
+	}
+	
+}
+/*==============================================================================
+* Function: Print_Display_Number
+* 
+* Description: 
+*
+==============================================================================*/
+void Print_Display_Number(T_UBYTE lub_Number){
+	
+	T_UBYTE lub_i;
+	typedef enum re_LEDS{
+		LED_E,
+		LED_D,
+		LED_C,
+		LED_B,
+		LED_A,
+		LED_F,
+		LED_G
+	};
+	T_UBYTE laub_LEDS[7] = { LED_A, LED_B, LED_C, LED_D, LED_E, LED_F, LED_G };
+	typedef T_UBYTE Num[7];
+	Num Numbers[10] = {{ 1, 1, 1, 1, 1, 1, 0},
+					   { 0, 1, 1, 0, 0, 0, 0},
+					   { 1, 1, 0, 1, 1, 0, 1},
+					   { 1, 1, 1, 1, 0, 0, 1},
+					   { 0, 1, 1, 0, 0, 1, 1},
+					   { 1, 0, 1, 1, 0, 1, 1},
+					   { 1, 0, 1, 1, 1, 1, 1},
+					   { 1, 1, 1, 0, 0, 0, 0},
+					   { 1, 1 ,1 ,1 ,1 ,1, 1},
+					   { 1, 1, 1, 1, 0, 1, 1}};
+	
+	
+	for(lub_i = 0; lub_i <= 6; lub_i++){
+		Set_Pin_State( laub_LEDS[lub_i], Numbers[lub_Number][lub_i]);
+	}
 }

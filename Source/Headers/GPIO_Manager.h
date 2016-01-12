@@ -68,13 +68,18 @@
 /* Public functions */
 /*============================================================================*/
 void Init_GPIO (void);
+
 void Set_LCD_Data_Output(void);
 void Set_LCD_Data_Input(void);
-
 void Set_LCD_E(T_UBYTE State);
 void Set_LCD_RW(T_UBYTE State);
 void Set_LCD_RS(T_UBYTE State);
 T_UBYTE Read_LCD_Data(void);
 void Set_LCD_Data(T_UBYTE Data_Pin,T_UBYTE State);
+
+void Display_Speed(T_UWORD);
+void Data_Module(T_UWORD);
+void Set_Transistors(T_UBYTE);
+void Print_Display_Number(T_UBYTE);
 
 #endif /* GPIO_MANAGER_H_ */
