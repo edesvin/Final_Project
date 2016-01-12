@@ -47,6 +47,7 @@
 /*============================================================================*/
 #include 	"TIMER.h"
 #include    "GPIO.h"
+#include 	"GPIO_Manager.h"
 #include    "bspi.h"
 #include    "Can.h"
 #include    "Can_Cfg.h"

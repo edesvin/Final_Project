@@ -46,6 +46,7 @@
 /*============================================================================*/
 #include "System_Initialization.h"
 
+
 /* Private functions */
 /*============================================================================*/
 static void Mode_Entry(void);
@@ -60,7 +61,7 @@ void System_Init(void){
 	InitPIT();									 /* PIT (Periodic Interrupt Timer) is initialized 		*/
 	InitSTM(); 									 /* Timer STM is initialized 							*/
 	Global_Init();								 /* The Scheduler is initialized						*/
-	vfnGPIO_LED_Init();							 /* Initialize LEDs on TRK-MPC560xB board 				*/
+	Init_GPIO();
 	InitDSPI_1();								 /* SPI is initialized. The SBC is initialized by SPI 	*/
 	ConfigureMZC33905DSPI_1();				 	 /* SBC  (System Basis Chip) configuration 				*/
 	CAN_Initialization(&can_driver_config);		 /* CAN Initialization 									*/
@@ -69,6 +70,7 @@ void System_Init(void){
 	INTC_EnableInterrupts();					 /* Enable External Interrupts							*/
 	LCDInit(LS_NONE);							 /* LCD initialization									*/
 	LCDClear();									 /* The LCD is cleared									*/
+	LCDWriteStringXY(0,0,"Hola");
 }
 /*==============================================================================
 * Function: Mode_Entry
