@@ -50,8 +50,9 @@
 
 /* Global variables */
 /*============================================================================*/
-T_ULONG rul_odometer;
-T_UWORD ruw_speed;
+T_ULONG rul_trip_odometer = 50;
+T_ULONG rul_odometer = 200;
+T_UWORD ruw_speed = 0;
 T_STRUCT_INDICATORS rs_indicators = {0,0,0,0,0};
 T_UWORD ruw_fuel_level;
 T_UBYTE Reset_TRIP_ODO;
@@ -64,6 +65,7 @@ T_UBYTE F_3_4_State (T_UBYTE);
 T_UBYTE F_1_2_State (T_UBYTE);
 T_UBYTE F_1_4_State (T_UBYTE);
 T_UBYTE F_Reserve_State (T_UBYTE);
+T_UBYTE F_Minimum_State(T_UBYTE);
 T_UBYTE F_Empty_State (T_UBYTE);
 void Init_Gas_State (void);
 T_UBYTE D_Opened_State (T_UBYTE);
@@ -92,7 +94,7 @@ void Reset_Debounce (void){
 *
 ==============================================================================*/
 void Update_speedometer (void){
-
+	Display_Speed(ruw_speed);
 }
 
 /*==============================================================================
@@ -102,7 +104,59 @@ void Update_speedometer (void){
 *
 ==============================================================================*/
 void Update_fuel (void){
-
+	
+	T_UBYTE lub_State_Fuel_Level;
+	
+	LCDWriteIntXY( 15, 3, ruw_fuel_level, 3 );
+	
+	if(ruw_fuel_level >= 400){
+		lub_State_Fuel_Level = 0;
+	}
+	else if(ruw_fuel_level >= 300){
+		lub_State_Fuel_Level = 1;
+	}
+	else if(ruw_fuel_level >= 200){
+		lub_State_Fuel_Level = 2;
+	}
+	else if(ruw_fuel_level >= 100){
+		lub_State_Fuel_Level = 3;
+	}
+	else if(ruw_fuel_level >= 62){
+		lub_State_Fuel_Level = 4;
+	}
+	else if(ruw_fuel_level >= 5){
+		lub_State_Fuel_Level = 5;
+	}
+	else{
+		lub_State_Fuel_Level = 6;
+	}
+	
+	switch(lub_State_Fuel_Level){
+	case 0:
+		lub_State_Fuel_Level = F_Full_State(lub_State_Fuel_Level);
+		break;
+	case 1:
+		lub_State_Fuel_Level = F_3_4_State(lub_State_Fuel_Level);
+		break;
+	case 2:
+		lub_State_Fuel_Level = F_1_2_State(lub_State_Fuel_Level);
+		break;
+	case 3:
+		lub_State_Fuel_Level = F_1_4_State(lub_State_Fuel_Level);
+		break;
+	case 4:
+		lub_State_Fuel_Level = F_Minimum_State(lub_State_Fuel_Level);
+		break;
+	case 5:
+		lub_State_Fuel_Level = F_Reserve_State(lub_State_Fuel_Level);
+		break;
+	case 6:
+		lub_State_Fuel_Level = F_Empty_State(lub_State_Fuel_Level);
+		break;
+	default:
+		break;
+	}
+	
 }
 
 /*==============================================================================
@@ -112,6 +166,10 @@ void Update_fuel (void){
 *
 ==============================================================================*/
 void Update_odometer(void){
+	
+	LCDWriteIntXY( 7, 1, rul_odometer / 10, 6 );
+	LCDWriteIntXY( 7, 2, rul_trip_odometer / 10, 4 );
+	LCDWriteIntXY( 12, 2, rul_trip_odometer % 10, 1 );
 
 }
 
@@ -122,7 +180,9 @@ void Update_odometer(void){
 *
 ==============================================================================*/
 void Update_indicators(void){
-
+	
+	Set_Indicator(rs_indicators, ruw_speed);
+	
 }
 
 /*==============================================================================
@@ -131,8 +191,8 @@ void Update_indicators(void){
 * Description: Fuel gauge full state.
 *
 ==============================================================================*/
-T_UBYTE F_Full_State (T_UBYTE){
-
+T_UBYTE F_Full_State (T_UBYTE lub_Data){
+	Set_Bar_Led(5);
 }
 
 /*==============================================================================
@@ -142,7 +202,7 @@ T_UBYTE F_Full_State (T_UBYTE){
 *
 ==============================================================================*/
 T_UBYTE F_3_4_State (T_UBYTE){
-
+	Set_Bar_Led(4);
 }
 
 /*==============================================================================
@@ -152,7 +212,7 @@ T_UBYTE F_3_4_State (T_UBYTE){
 *
 ==============================================================================*/
 T_UBYTE F_1_2_State (T_UBYTE){
-
+	Set_Bar_Led(3);
 }
 
 /*==============================================================================
@@ -162,7 +222,7 @@ T_UBYTE F_1_2_State (T_UBYTE){
 *
 ==============================================================================*/
 T_UBYTE F_1_4_State (T_UBYTE){
-
+	Set_Bar_Led(2);
 }
 
 /*==============================================================================
@@ -172,7 +232,8 @@ T_UBYTE F_1_4_State (T_UBYTE){
 *
 ==============================================================================*/
 T_UBYTE F_Reserve_State (T_UBYTE){
-
+	Set_Bar_Led(1);
+	Set_Reserve_Led();
 }
 
 /*==============================================================================
@@ -182,9 +243,17 @@ T_UBYTE F_Reserve_State (T_UBYTE){
 *
 ==============================================================================*/
 T_UBYTE F_Empty_State (T_UBYTE){
-
+	Set_Bar_Led(0);
 }
-
+/*==============================================================================
+* Function: F_Minimum_State
+* 
+* Description: Fuel gauge empty state.
+*
+==============================================================================*/
+T_UBYTE F_Minimum_State(T_UBYTE){
+	Set_Bar_Led(1);
+}
 /*==============================================================================
 * Function: Init_Gas_State
 * 

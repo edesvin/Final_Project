@@ -45,16 +45,10 @@
 /* Includes */
 /*============================================================================*/
 #include "GPIO_Manager.h"
+#include "LCD.h"
 
 
-typedef struct{
-	T_UBYTE Opened_Doors	: 1;
-	T_UBYTE Seat_Belt	 	: 1;
-	T_UBYTE Fuel_Reserve	: 1;
-	T_UBYTE High_Beams 	 	: 1;
-	T_UBYTE Emergency_Break : 1;
-	
-}T_STRUCT_INDICATORS;
+
 /* Public functions */
 /*============================================================================*/
 void Update_speedometer (void);
@@ -64,6 +58,7 @@ void Update_indicators(void);
 
 /* Global variables */
 /*============================================================================*/
+extern T_ULONG rul_trip_odometer;
 extern T_ULONG rul_odometer;
 extern T_UWORD ruw_speed;
 extern T_STRUCT_INDICATORS rs_indicators;
