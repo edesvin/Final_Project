@@ -52,7 +52,7 @@
 
 void CanManager_Receive_Fuel_Level (CAN_MessageDataType CanMessage){
 	if( CanMessage.msg_dlc_field == 2 ){
-		ruw_fuel_level = CanMessage.msg_data_field[0] + (((T_UWORD)(CanMessage.msg_data_field[1]))<<8) & 0xFF00;
+		ruw_fuel_level = CanMessage.msg_data_field[0] + (+(((T_UWORD)(CanMessage.msg_data_field[1]))<<8) & 0xFF00);
 	}else{
 		/* Do nothing */
 	}
@@ -67,6 +67,7 @@ void CanManager_Receive_Fuel_Level (CAN_MessageDataType CanMessage){
 void CanManager_Receive_Odometer_Increment (CAN_MessageDataType CanMessage){
 	if( CanMessage.msg_dlc_field == 1 ){
 		rul_odometer += CanMessage.msg_data_field[0];
+		rul_trip_odometer += CanMessage.msg_data_field[0];
 	}else{
 		/* Do nothing */
 	}
@@ -79,7 +80,7 @@ void CanManager_Receive_Odometer_Increment (CAN_MessageDataType CanMessage){
 ==============================================================================*/
 void CanManager_Receive_Speed (CAN_MessageDataType CanMessage){
 	if( CanMessage.msg_dlc_field == 2 ){
-		ruw_speed = CanMessage.msg_data_field[0] + (((T_UWORD)(CanMessage.msg_data_field[1]))<<8) & 0xFF00;
+		ruw_speed = CanMessage.msg_data_field[0] + ((((T_UWORD)(CanMessage.msg_data_field[1]))<<8) & 0xFF00);
 	}else{
 		/* Do nothing */
 	}
@@ -92,12 +93,11 @@ void CanManager_Receive_Speed (CAN_MessageDataType CanMessage){
 *
 ==============================================================================*/
 void CanManager_Receive_Indicators_Status (CAN_MessageDataType CanMessage){
-	if( CanMessage.msg_dlc_field == 5 ){
+	if( CanMessage.msg_dlc_field == 4 ){
 		rs_indicators.Opened_Doors 		= CanMessage.msg_data_field[0];
 		rs_indicators.Seat_Belt	 		= CanMessage.msg_data_field[1];
-		rs_indicators.Fuel_Reserve		= CanMessage.msg_data_field[2];
-		rs_indicators.High_Beams 		= CanMessage.msg_data_field[3];
-		rs_indicators.Emergency_Break 	= CanMessage.msg_data_field[4];
+		rs_indicators.High_Beams 		= CanMessage.msg_data_field[2];
+		rs_indicators.Emergency_Break 	= CanMessage.msg_data_field[3];
 	}else{
 		/* Do nothing */
 	}
