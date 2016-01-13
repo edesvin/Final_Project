@@ -120,6 +120,6 @@ T_UBYTE Get_Pin_State_IN (T_UBYTE lub_PIN){
 ==============================================================================*/
 T_UBYTE Get_Pin_State_OUT (T_UBYTE lub_PIN){
 	
-	return !SIU.GPDO[lub_PIN].B.PDO;
+	return SIU.GPDO[lub_PIN].B.PDO;
 	
 }
