@@ -6,11 +6,11 @@
 /*============================================================================*/
 /*!
  * $Source: System_Initialization.c $
- * $Revision: 1.1 $
+ * $Revision: 1.0 $
  * $Author: 	Edgar Escayola Vinagre	$
  * 				Adrian Zacarias Siete 	$
  *				
- * $Date: 12-01-2016 $
+ * $Date: 06-12-2015 $
  */
 /*============================================================================*/
 /* DESCRIPTION :                                                              */
@@ -34,7 +34,7 @@
 /*============================================================================*/
 /*  DATABASE           |        PROJECT     | FILE VERSION (AND INSTANCE)     */
 /*----------------------------------------------------------------------------*/
-/*                     |        Cluster_EA  |         1.1                     */
+/*                     |         	        |         1.0                      */
 /*============================================================================*/
 /*                               OBJECT HISTORY                               */
 /*============================================================================*/
@@ -68,11 +68,12 @@ void System_Init(void){
 	INTC_InitINTCInterrupts();					 /* Initialize Interrupts 								*/
 	EXCEP_InitExceptionHandlers();				 /* Initialize Exception Handlers 						*/
 	INTC_EnableInterrupts();					 /* Enable External Interrupts							*/
-	ADC_Config();								 /* Configure the pins used for the ADC					*/
-	ADCModeSelector();							 /* Selects the mode of operation for the ADC			*/
 	LCDInit(LS_NONE);							 /* LCD initialization									*/
 	LCDClear();									 /* The LCD is cleared									*/
-	LCDWriteStringXY(0,0,"Hola");
+	LCDWriteStringXY( 2, 0, "Continental AEP");
+	LCDWriteIntXY( 7, 1, 0, 6 );
+	LCDWriteIntXY( 7, 2, 0, 6 );
+	LCDWriteStringXY( 11, 2, "." );
 }
 /*==============================================================================
 * Function: Mode_Entry

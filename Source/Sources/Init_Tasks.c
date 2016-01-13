@@ -55,8 +55,8 @@ volatile T_UWORD raub_DynConuter[E_TSK_N_OF];
 
 const S_STAT cas_STAT[E_TSK_N_OF] = {/*	Function Pointer	-	Period 	-	  Offset	*/
 		
-		{		&Task0_5ms,					5	,		0		},
-		{		&Task1_10ms,				10	,		1		},
+		{		&Task0_3ms,					3	,		0		},
+		{		&Task1_5ms,					5	,		1		},
 		{		&Task2_50ms,				50	,		2		},
 		{		&Task3_100ms,				100	,		3		},
 		{		&Task4_200ms,				200	,		5		},

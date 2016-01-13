@@ -46,10 +46,11 @@
 /*============================================================================*/
 #include "typedefs.h"
 #include "Can_Manager.h"
+#include "GPIO_Manager.h"
 /* Exported functions prototypes */
 /*============================================================================*/
-extern void Task0_5ms(void);
-extern void Task1_10ms(void);
+extern void Task0_3ms(void);
+extern void Task1_5ms(void);
 extern void Task2_50ms(void);
 extern void Task3_100ms(void);
 extern void Task4_200ms(void);
