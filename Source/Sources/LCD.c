@@ -70,7 +70,7 @@
 #define MAX_X_VALUE					0x14
 #define DATA_OFFSET					0x30
 #define TENTH						0x0A
-#define MAX_FIELD_LENGTH			0x05
+#define MAX_FIELD_LENGTH			0x06
 #define STM_1us						0x40
 #define STM_500ns					0x20
 #define STM_30ms					0x1D4C00
@@ -84,7 +84,7 @@ void delay_500ns(void);
 void delay_30ms(void);
 void LCDBusyLoop(void);
 void LCDWriteString(const char *);
-void LCDWriteInt(T_UWORD, T_SBYTE);
+void LCDWriteInt(T_ULONG, T_SBYTE);
 void LCDGotoXY(T_UBYTE, T_UBYTE);
 
 /* Private functions */
@@ -144,9 +144,9 @@ void LCDWriteStringXY(T_UBYTE lub_x, T_UBYTE lub_y, const char *cpub_msg){
 * Description: Function that receives the position and value to be printed.
 *
 ==============================================================================*/
-void LCDWriteIntXY(T_UBYTE lub_x, T_UBYTE lub_y, T_UWORD lub_val, T_SBYTE lub_fl){
+void LCDWriteIntXY(T_UBYTE lub_x, T_UBYTE lub_y, T_ULONG lul_val, T_SBYTE lub_fl){
 	 LCDGotoXY(lub_x, lub_y);			/* Set the position of the cursor */
-	 LCDWriteInt(lub_val, lub_fl); 		/* Print the value				  */
+	 LCDWriteInt(lul_val, lub_fl); 		/* Print the value				  */
 }
 
 /*==============================================================================
@@ -344,14 +344,14 @@ void LCDWriteString(const char *cpub_msg){
 * in the LCD.
 *
 ==============================================================================*/
-void LCDWriteInt(T_UWORD luw_val, T_SBYTE lsb_field_length){
+void LCDWriteInt(T_ULONG lul_val, T_SBYTE lsb_field_length){
 	
-	T_UBYTE laub_str[MAX_FIELD_LENGTH] = {0,0,0,0,0};	/* Array to save the bytes of the received variable	  */
-	T_UBYTE lub_i = 4, lub_j = 0;
+	T_UBYTE laub_str[MAX_FIELD_LENGTH] = {0,0,0,0,0,0};	/* Array to save the bytes of the received variable	  */
+	T_UBYTE lub_i = 5, lub_j = 0;
 
-	while(luw_val){
-		laub_str[lub_i] = (T_UBYTE)(luw_val % TENTH);	/* Get the residue of the division by ten. 	 				      */
-		luw_val = luw_val / TENTH;			/* Divide the value by 10.									      */
+	while(lul_val){
+		laub_str[lub_i] = (T_UBYTE)(lul_val % TENTH);	/* Get the residue of the division by ten. 	 				      */
+		lul_val = lul_val / TENTH;			/* Divide the value by 10.									      */
 		lub_i--;							/* Subtract one to the counter to divide the whole number.	      */
 	}
 	if(lsb_field_length == -1){				/* If the field length is minus one, the length is calculated.    */
