@@ -64,11 +64,12 @@ static void InitPITChannel (T_UBYTE);
 *
 ==============================================================================*/
 void InitSTM(void){
+	
 	STM.CR.B.CPS = 0x00;			/* Preescaler value = 1 			*/
 	STM.CR.B.FRZ = 0x00; 			/* Disable debug mode for timer.	*/
 	STM.CR.B.TEN = 0x01; 			/* Enable STM timer.				*/
-}
 
+}
 /*==============================================================================
 * Function: 
 * 
@@ -76,7 +77,9 @@ void InitSTM(void){
 *
 ==============================================================================*/
 void Clear_STM(void){
+	
 	STM_VALUE = CLEAR;
+
 }
 /*==============================================================================
 * Function: InitPIT
