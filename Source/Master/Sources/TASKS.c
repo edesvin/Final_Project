@@ -125,12 +125,7 @@ void Task0_3ms(void){
 *
 ==============================================================================*/
 void Task1_5ms(void){
-	/* Display_Speed(); */
-	Display_Speed();
-	
-#ifdef TRANSMITTER
-	CanManager_SendMessage_12p5ms();
-#endif
+	/* Do nothing */
 }
 
 /*==============================================================================
@@ -139,11 +134,7 @@ void Task1_5ms(void){
 *
 ==============================================================================*/
 void Task2_50ms(void){
-
-	/* Update_speedometer(); */
-#ifdef TRANSMITTER
-	CanManager_SendMessage_25ms();
-#endif
+	/* Do nothing */	
 }
 
 /*==============================================================================
@@ -152,10 +143,7 @@ void Task2_50ms(void){
 *
 ==============================================================================*/
 void Task3_100ms(void){
-	/* Update_fuel();  */
-#ifdef TRANSMITTER
-	CanManager_SendMessage_100ms();
-	#endif
+	CanManager_Send_Fuel_Level();
 }
 
 /*==============================================================================
@@ -164,7 +152,7 @@ void Task3_100ms(void){
 *
 ==============================================================================*/
 void Task4_200ms(void){
-	/* Update_odometer();   */
+	CanManager_Send_Speed();
 }
 
 /*==============================================================================
@@ -173,10 +161,6 @@ void Task4_200ms(void){
 *
 ==============================================================================*/
 void Task5_250ms(void){
-	/* Get_switches_State();
-	 * Update_indicators(); */
-	CanManager_Send_Speed();
-	CanManager_Send_Fuel_Level();
 	CanManager_Send_Indicators();
 	CanManager_Send_Odometer_Increment();
 }
