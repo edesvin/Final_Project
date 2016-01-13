@@ -65,6 +65,21 @@
 #define PIN_LCD_DATA_1	81
 #define PIN_LCD_DATA_2	82
 #define PIN_LCD_DATA_3	83
+
+#define LED_OPENED_DOOR 	100
+#define LED_SEAT_BELT 		99
+#define LED_HIGH_BEAMS 		98
+#define LED_EMERGENCY_BREAK 97
+#define LED_RESERVE			96
+
+typedef struct{
+	T_UBYTE Opened_Doors	: 1;
+	T_UBYTE Seat_Belt	 	: 1;
+	T_UBYTE Fuel_Reserve	: 1;
+	T_UBYTE High_Beams 	 	: 1;
+	T_UBYTE Emergency_Break : 1;
+	
+}T_STRUCT_INDICATORS;
 /* Public functions */
 /*============================================================================*/
 void Init_GPIO (void);
@@ -82,4 +97,9 @@ void Data_Module(T_UWORD);
 void Set_Transistors(T_UBYTE);
 void Print_Display_Number(T_UBYTE);
 
+void Set_Indicator(T_STRUCT_INDICATORS, T_UWORD);
+
+void Set_Bar_Led(T_UBYTE);
+void Set_Reserve_Led(void);
+		
 #endif /* GPIO_MANAGER_H_ */

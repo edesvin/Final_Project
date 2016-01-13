@@ -54,6 +54,8 @@
 #define TRANSISTOR_2 8
 #define TRANSISTOR_3 9
 
+#define Data_MAX_DISPLAYS 1000
+
 T_UBYTE ruw_Display_Selector = 0;
 
 static T_UBYTE ruw_Display_Number1;
@@ -86,12 +88,7 @@ void Init_GPIO (void){
 		Set_Pin_State( PORTG + lub_i, OFF);
 	}
 	
-	for(lub_i = 0; lub_i <= 6; lub_i++){	/*	led bar initialization */
-		Set_Pin_Mode(PORTD + lub_i, OUT);
-		Set_Pin_State( PORTD + lub_i, OFF);
-	}
-	
-	for(lub_i = 0; lub_i <= 6; lub_i++){	/*	LCD initialization */
+	for(lub_i = 0; lub_i <= 13; lub_i++){	/*	LCD initialization and	led bar initialization */
 		Set_Pin_Mode(PORTF + lub_i, OUT);
 		Set_Pin_State( PORTF + lub_i, OFF);
 	}
@@ -100,7 +97,7 @@ void Init_GPIO (void){
 	Set_Pin_Mode(PORTG + 5, IN);	/*	switch bat		*/
 	Set_Pin_Mode(PORTG + 6, IN);	/*	switch ignition	*/
 	Set_Pin_Mode(PORTG + 7, IN);	/*	reset trip-odo	*/
-	Set_Pin_Mode(PORTD + 7, IN);	/*	unit selector	*/
+	Set_Pin_Mode(PORTF + 14, IN);	/*	unit selector	*/
 	
 }
 /*==============================================================================
@@ -227,11 +224,25 @@ void Display_Speed(T_UWORD luw_speed){
 ==============================================================================*/
 void Data_Module(T_UWORD luw_Data){
 	
-	ruw_Display_Number1 = luw_Data / 100;
-	luw_Data = luw_Data % 100;
-	ruw_Display_Number2 = luw_Data / 10;
-	ruw_Display_Number3 = luw_Data % 10;
+	T_UWORD luw_Module_Data;
 	
+	luw_Module_Data = luw_Data % 100;
+	luw_Data = luw_Data / 100;
+	if(luw_Module_Data >= 50){
+		luw_Data++;
+	}
+	
+	if(luw_Data < Data_MAX_DISPLAYS){
+		ruw_Display_Number1 = luw_Data / 100;
+		luw_Data = luw_Data % 100;
+		ruw_Display_Number2 = luw_Data / 10;
+		ruw_Display_Number3 = luw_Data % 10;
+	}
+	else{
+		ruw_Display_Number1 = 9;
+		ruw_Display_Number2 = 9;
+		ruw_Display_Number3 = 9;
+	}
 }
 /*==============================================================================
 * Function: Set_Transistors
@@ -297,4 +308,61 @@ void Print_Display_Number(T_UBYTE lub_Number){
 	for(lub_i = 0; lub_i <= 6; lub_i++){
 		Set_Pin_State( laub_LEDS[lub_i], Numbers[lub_Number][lub_i]);
 	}
+}
+/*==============================================================================
+* Function: Set_Indicator
+* 
+* Description: 
+*
+==============================================================================*/
+void Set_Indicator(T_STRUCT_INDICATORS ls_indicators, T_UWORD lub_speed){
+	
+	if(lub_speed >= 500 && ls_indicators.Opened_Doors == TRUE){
+		Set_Pin_State( LED_OPENED_DOOR, ON);
+	}
+	else{
+		Set_Pin_State( LED_OPENED_DOOR, OFF);
+	}
+	
+	if(lub_speed >= 1000 && ls_indicators.Seat_Belt == TRUE){
+		Set_Pin_State( LED_SEAT_BELT, !Get_Pin_State_OUT(LED_SEAT_BELT));
+	}
+	else if(ls_indicators.Seat_Belt == TRUE){
+		Set_Pin_State( LED_SEAT_BELT, ON);
+	}
+	else{
+		Set_Pin_State( LED_SEAT_BELT, OFF);
+	}
+	
+	Set_Pin_State( LED_HIGH_BEAMS, 		ls_indicators.High_Beams);
+	Set_Pin_State( LED_EMERGENCY_BREAK, ls_indicators.Emergency_Break);
+	
+}
+/*==============================================================================
+* Function: Set_Bar_Led
+* 
+* Description: 
+*
+==============================================================================*/
+void Set_Bar_Led(T_UBYTE lub_Data){
+	
+	T_UBYTE lub_i;
+	
+	for(lub_i = 0; lub_i < 5; lub_i++){
+			Set_Pin_State((PORTF + 7) + lub_i, OFF);
+		}
+	for(lub_i = 0; lub_i < lub_Data; lub_i++){
+		Set_Pin_State((PORTF + 7) + lub_i, ON);
+	}
+	Set_Pin_State(LED_RESERVE, OFF);
+	
+}
+/*==============================================================================
+* Function: Set_Reserve_Led
+* 
+* Description: 
+*
+==============================================================================*/
+void Set_Reserve_Led(void){
+	Set_Pin_State(LED_RESERVE, ON);
 }
