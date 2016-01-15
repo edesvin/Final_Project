@@ -51,10 +51,12 @@
 
 /* Public functions */
 /*============================================================================*/
-void Update_speedometer (void);
+void Update_Displays (void);
+void Update_speedometer(void);
 void Update_fuel (void);
 void Update_odometer(void);
 void Update_indicators(void);
+void Debounce (void);
 
 /* Global variables */
 /*============================================================================*/
@@ -64,5 +66,7 @@ extern T_UWORD ruw_speed;
 extern T_STRUCT_INDICATORS rs_indicators;
 extern T_UWORD ruw_fuel_level;
 extern T_UBYTE Reset_TRIP_ODO;
+
+T_UBYTE Set_State(T_UBYTE);
 /*============================================================================*/
 #endif /* CLUSTER_EA_H_ */
