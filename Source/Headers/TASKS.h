@@ -47,6 +47,7 @@
 #include "typedefs.h"
 #include "Can_Manager.h"
 #include "GPIO_Manager.h"
+#include "D_FLASH.h"
 /* Exported functions prototypes */
 /*============================================================================*/
 extern void Task0_3ms(void);
@@ -55,6 +56,7 @@ extern void Task2_50ms(void);
 extern void Task3_100ms(void);
 extern void Task4_200ms(void);
 extern void Task5_250ms(void);
+extern void Task5_1000ms(void);
 /*Add here the prototype of your new task*/
 
 #endif /* TASKS_H_ */

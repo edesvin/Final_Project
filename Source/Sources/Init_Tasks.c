@@ -61,6 +61,7 @@ const S_STAT cas_STAT[E_TSK_N_OF] = {/*	Function Pointer	-	Period 	-	  Offset	*/
 		{		&Task3_100ms,				100	,		3		},
 		{		&Task4_200ms,				200	,		5		},
 		{		&Task5_250ms,				250	,		7		},
+		{		&Task5_1000ms,				1000,		8		},
 		/*	Add here your new task and a comma before the last one	*/			
 		/*	{	Function Pointer	,	Period	,		Offset	}	*/	
 };

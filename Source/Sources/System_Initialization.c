@@ -74,6 +74,7 @@ void System_Init(void){
 	LCDWriteIntXY( 7, 1, 0, 6 );
 	LCDWriteIntXY( 7, 2, 0, 6 );
 	LCDWriteStringXY( 11, 2, "." );
+	Init_DFLASH();
 }
 /*==============================================================================
 * Function: Mode_Entry

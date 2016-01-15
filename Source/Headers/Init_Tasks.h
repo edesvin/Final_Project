@@ -58,6 +58,7 @@ typedef enum{
 	E_TSK_TASK3,
 	E_TSK_TASK4,
 	E_TSK_TASK5,
+	E_TSK_TASK6,
 	/*Write here your new tasks*/
 	
 	E_TSK_N_OF
