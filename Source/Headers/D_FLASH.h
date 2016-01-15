@@ -4,7 +4,7 @@
 /*                        OBJECT SPECIFICATION                                */
 /*============================================================================*/
 /*!
- * $Source: C_FLASH.c $
+ * $Source: C_FLASH.h $
  * $Revision: 1.0 $
  * $Author: 	Edgar Escayola Vinagre	$
  * 				Adrian Zacarias Siete 	$
@@ -38,68 +38,28 @@
 /*                               OBJECT HISTORY                               */
 /*============================================================================*/
 /*
- * $Log: C_FLASH.c  $
+ * $Log: C_FLASH.h  $
   ============================================================================*/
-
+#ifndef C_FLASH_H_
+#define C_FLASH_H_
 /* Includes */
 /*============================================================================*/
-#include "C_FLASH.h"
-/* Private functions */
+#include "MPC5606B.h"
+#include "stdtypedef.h"
+#include "GPIO_Manager.h"
 /*============================================================================*/
-void Func_Erase_CFLASH(T_ULONG);
-/*==============================================================================
-* Function: Init_CFLASH
-* 
-* Description: 
-*
-==============================================================================*/
-void Init_CFLASH(void){
-	
-	CFLASH.LML.R = 0xA1A11111; /* write password */
-	CFLASH.LML.R = 0x00100000; /* unlock low and mid blocks primary */
-	CFLASH.SLL.R = 0xC3C33333; /* write password */
-	CFLASH.SLL.R = 0x00100000; /* unlock low and mid blocks secondary */
-	CFLASH.HBL.R = 0xB2B22222; /* write password */
-	CFLASH.HBL.R = 0x00000000;  /* unlock high blocks */
-	
-}
-/*==============================================================================
-* Function: FuncEraserFLASH
-* 
-* Description: 
-*
-==============================================================================*/
-void Func_Erase_CFLASH(T_ULONG lub_Dir){
-	
-	CFLASH.MCR.B.ERS = 1;
-	CFLASH.LMS.R = 0x00000008; /* select B0F3 */
-	*(T_ULONG *)lub_Dir = 0xFFFFFFFF; /* interlock write - write to any address in selected memory */
-	CFLASH.MCR.B.EHV = 1;
-	while(!CFLASH.MCR.B.DONE){
-		/* Do nothing*/
-	}
-	CFLASH.MCR.B.EHV = 0;
-	CFLASH.MCR.B.ERS = 0;
+#define START_ADDRESS	0x00804000
+#define FINAL_ADDRESS	0x00807FF0
+#define INCREMENT 8
 
-}
-/*==============================================================================
-* Function: FuncWriteFLASH
-* 
-* Description: 
-*
-==============================================================================*/
-void Func_Write_CFLASH(T_ULONG lub_Dir, T_ULONG lub_Data){
-	
-	Func_Erase_CFLASH(lub_Dir);
-	
-	CFLASH.MCR.B.PGM = 1; 
-	*(T_ULONG *)lub_Dir = lub_Data; /* interlock write */
-	CFLASH.MCR.B.EHV = 1;
-	while(!CFLASH.MCR.B.DONE){
-		/*Do nothing*/
-	}
-	CFLASH.MCR.B.EHV = 0;
-	CFLASH.MCR.B.PGM = 0;
-	
-}
-/*=============================================================================*/
+/* Public functions */
+/*============================================================================*/
+void Init_DFLASH(void);
+void Func_Write_DFLASH(T_ULONG, T_ULONG, T_ULONG);
+void Func_Erase_DFLASH(T_ULONG);
+
+void Set_Valid_Direction(void);
+void Set_Odo_Values(void);
+void Check_Last_Address(void);
+void Save_Data(void);
+#endif /* C_FLASH_H_ */
