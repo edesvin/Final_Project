@@ -79,7 +79,7 @@ void CanManager_Receive_Odometer_Increment (CAN_MessageDataType CanMessage){
 *
 ==============================================================================*/
 void CanManager_Receive_Speed (CAN_MessageDataType CanMessage){
-	if( CanMessage.msg_dlc_field == 2 ){
+	if( CanMessage.msg_dlc_field == 2 || CanMessage.msg_dlc_field == 3){
 		ruw_speed = CanMessage.msg_data_field[0] + ((((T_UWORD)(CanMessage.msg_data_field[1]))<<8) & 0xFF00);
 	}else{
 		/* Do nothing */
