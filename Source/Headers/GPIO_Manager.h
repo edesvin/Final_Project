@@ -52,6 +52,11 @@
 #define PORTF 80	//LCD
 #define PORTD 48	//led-bar
 
+#define RESET_ODO 		94
+#define SWITCH_BAT		101
+#define SWITCH_IGN		102
+#define UNIT_SELECTOR	103
+
 #define BOARD_LEDS 68
 
 #define LCD_E	84
@@ -92,7 +97,7 @@ void Set_LCD_RS(T_UBYTE State);
 T_UBYTE Read_LCD_Data(void);
 void Set_LCD_Data(T_UBYTE Data_Pin,T_UBYTE State);
 
-void Display_Speed(T_UWORD);
+void Display_Speed(void);
 void Data_Module(T_UWORD);
 void Set_Transistors(T_UBYTE);
 void Print_Display_Number(T_UBYTE);
@@ -101,5 +106,7 @@ void Set_Indicator(T_STRUCT_INDICATORS, T_UWORD);
 
 void Set_Bar_Led(T_UBYTE);
 void Set_Reserve_Led(void);
+
+void Push_Button_State(void);
 		
 #endif /* GPIO_MANAGER_H_ */

@@ -50,18 +50,25 @@
 #define LED_OFF 1
 #define LED_ON	0
 
+#define CLEAR 0
+
 #define TRANSISTOR_1 7
 #define TRANSISTOR_2 8
 #define TRANSISTOR_3 9
 
 #define Data_MAX_DISPLAYS 1000
 
+#define MILES 		1
+#define  KILOMETERS 0
+
 T_UBYTE ruw_Display_Selector = 0;
 
-static T_UBYTE ruw_Display_Number1;
-static T_UBYTE ruw_Display_Number2;
+static T_UBYTE rub_Display_Number1;
+static T_UBYTE rub_Display_Number2;
 static T_UBYTE ruw_Display_Number3;
 
+T_UBYTE rub_Reset_Validation_Flag = 0;
+T_UBYTE rub_Unit_Selector_Validation_Flag = 0;
 /*==============================================================================
 * Function: Init_GPIO
 * 
@@ -92,6 +99,8 @@ void Init_GPIO (void){
 		Set_Pin_Mode(PORTF + lub_i, OUT);
 		Set_Pin_State( PORTF + lub_i, OFF);
 	}
+	
+	Set_Pin_State(PORTF + 12, ON);
 	
 	//Output configuration
 	Set_Pin_Mode(PORTG + 5, IN);	/*	switch bat		*/
@@ -189,19 +198,17 @@ void Set_LCD_Data(T_UBYTE Data_Pin,T_UBYTE State){
 * Description: 
 *
 ==============================================================================*/
-void Display_Speed(T_UWORD luw_speed){
-
-	Data_Module(luw_speed);
+void Display_Speed(void){
 
 	switch (ruw_Display_Selector){
 		case 0:
 			Set_Transistors(ruw_Display_Selector);
-			Print_Display_Number(ruw_Display_Number1);
+			Print_Display_Number(rub_Display_Number1);
 			ruw_Display_Selector = 1;
 			break;
 		case 1:
 			Set_Transistors(ruw_Display_Selector);
-			Print_Display_Number(ruw_Display_Number2);
+			Print_Display_Number(rub_Display_Number2);
 			ruw_Display_Selector = 2;
 			break;
 		case 2:
@@ -212,9 +219,8 @@ void Display_Speed(T_UWORD luw_speed){
 		default:
 			/* Do nothing */
 			break;
-		
 	}
-
+	
 }
 /*==============================================================================
 * Function: Data_Module
@@ -225,6 +231,33 @@ void Display_Speed(T_UWORD luw_speed){
 void Data_Module(T_UWORD luw_Data){
 	
 	T_UWORD luw_Module_Data;
+	static T_UBYTE lub_Unit_indicator;
+	
+	if(rub_Unit_Selector_Validation_Flag == TRUE && Get_Pin_State_IN(UNIT_SELECTOR) == FALSE){
+		
+		rub_Unit_Selector_Validation_Flag = CLEAR;
+		
+		if(lub_Unit_indicator == MILES){
+			lub_Unit_indicator = KILOMETERS;
+			Set_Pin_State(PORTF + 12, ON);
+			Set_Pin_State(PORTF + 13, OFF);
+		}
+		else if(lub_Unit_indicator == KILOMETERS){
+			lub_Unit_indicator = MILES;
+			Set_Pin_State(PORTF + 12, OFF);
+			Set_Pin_State(PORTF + 13, ON);
+		}
+		else{
+			/*	Do nothing	*/
+		}
+	}
+	
+	if(lub_Unit_indicator == MILES){
+		luw_Data = luw_Data / 1.6;
+	}
+	else{
+		/*	Do nothing	*/
+	}
 	
 	luw_Module_Data = luw_Data % 100;
 	luw_Data = luw_Data / 100;
@@ -233,14 +266,14 @@ void Data_Module(T_UWORD luw_Data){
 	}
 	
 	if(luw_Data < Data_MAX_DISPLAYS){
-		ruw_Display_Number1 = luw_Data / 100;
+		rub_Display_Number1 = (T_UBYTE)(luw_Data / 100);
 		luw_Data = luw_Data % 100;
-		ruw_Display_Number2 = luw_Data / 10;
-		ruw_Display_Number3 = luw_Data % 10;
+		rub_Display_Number2 = (T_UBYTE)(luw_Data / 10);
+		ruw_Display_Number3 = (T_UBYTE)(luw_Data % 10);
 	}
 	else{
-		ruw_Display_Number1 = 9;
-		ruw_Display_Number2 = 9;
+		rub_Display_Number1 = 9;
+		rub_Display_Number2 = 9;
 		ruw_Display_Number3 = 9;
 	}
 }
@@ -255,21 +288,30 @@ void Set_Transistors(T_UBYTE lub_transistor){
 	T_UBYTE lub_i;
 	
 	for(lub_i = 0; lub_i<=2; lub_i++){
+		
 		Set_Pin_State(TRANSISTOR_1 + lub_i, OFF);
+	
 	}
 	
-	switch(lub_transistor){
-		case 0:
-			Set_Pin_State(TRANSISTOR_1, ON);
-			break;
-		case 1:
-			Set_Pin_State(TRANSISTOR_2, ON);
-			break;
-		case 2:
-			Set_Pin_State(TRANSISTOR_3, ON);
-			break;
-		default:
-			break;
+	if(Get_Pin_State_IN(PORTG + 6) == TRUE){
+	
+		switch(lub_transistor){
+			case 0:
+				Set_Pin_State(TRANSISTOR_1, ON);
+				break;
+			case 1:
+				Set_Pin_State(TRANSISTOR_2, ON);
+				break;
+			case 2:
+				Set_Pin_State(TRANSISTOR_3, ON);
+				break;
+			default:
+				break;
+		}
+	
+	}
+	else{
+		/*	Do nothing	*/
 	}
 	
 }
@@ -350,7 +392,7 @@ void Set_Bar_Led(T_UBYTE lub_Data){
 	
 	for(lub_i = 0; lub_i < 5; lub_i++){
 			Set_Pin_State((PORTF + 7) + lub_i, OFF);
-		}
+	}
 	for(lub_i = 0; lub_i < lub_Data; lub_i++){
 		Set_Pin_State((PORTF + 7) + lub_i, ON);
 	}
@@ -365,4 +407,36 @@ void Set_Bar_Led(T_UBYTE lub_Data){
 ==============================================================================*/
 void Set_Reserve_Led(void){
 	Set_Pin_State(LED_RESERVE, ON);
+}
+/*==============================================================================
+* Function: Push_Button_State
+* 
+* Description: 
+*
+==============================================================================*/
+void Push_Button_State(void){
+	
+	static T_UBYTE lub_Reset_Validation_Count = 0;
+	static T_UBYTE lub_Unit_Selector_Validation_Count = 0;
+	
+	if(Get_Pin_State_IN(RESET_ODO) == TRUE){
+		lub_Reset_Validation_Count++;
+		if(lub_Reset_Validation_Count >= 5){
+			lub_Reset_Validation_Count = 10;
+			rub_Reset_Validation_Flag = 1;
+		}
+	}
+	else{
+		lub_Reset_Validation_Count = 0;
+	}
+	if(Get_Pin_State_IN(UNIT_SELECTOR) == TRUE){
+		lub_Unit_Selector_Validation_Count++;
+		if(lub_Unit_Selector_Validation_Count >= 5){
+			lub_Unit_Selector_Validation_Count = 10;
+			rub_Unit_Selector_Validation_Flag = 1;
+		}
+	}
+	else{
+		lub_Unit_Selector_Validation_Count = 0;
+	}
 }
